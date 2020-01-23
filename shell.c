@@ -1,7 +1,8 @@
 #include <stdio.h>
+#define STR_LIMIT 512
 
 int main() {
-    char str [512];
+    char str[STR_LIMIT];
     printf("> ");
-    scanf("%s", str);
+    fgets(str, STR_LIMIT, stdin);
 }
