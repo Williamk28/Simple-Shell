@@ -6,9 +6,11 @@
 #define PROMPT "> "
 #define DELIMITER " \t|><&;\n"
 #define HOME getenv("HOME")
+#define USER getenv("USER")
 #define DEBUG
 
 char *cwd;
+char *user;
 int getCommand()
 {
     //Variable to store users input. Set to hold a max of 512 characters
@@ -46,11 +48,13 @@ int main()
 {
     //Set working directory to users home directory
     cwd = HOME;
+    //Set user to the username of the user
+    user = USER;
     //Loop until the shell is terminated
     do
     {
         //Print current directory
-        printf("Dir: %s", cwd);
+        printf("%s: %s", user, cwd);
         //Get user input
         getCommand();
     } while (1);
