@@ -11,7 +11,7 @@
 
 char *cwd;
 char *user;
-int getCommand()
+void getCommand()
 {
     //Variable to store users input. Set to hold a max of 512 characters
     char str[STR_LIMIT];
@@ -41,7 +41,6 @@ int getCommand()
         #endif
         token = strtok(NULL, DELIMITER);
     }
-    return 1;
 }
 
 int main()
@@ -53,7 +52,7 @@ int main()
     //Loop until the shell is terminated
     do
     {
-        //Print current directory
+        //Print user, current directory and prompt
         printf("%s: %s", user, cwd);
         //Get user input
         getCommand();
