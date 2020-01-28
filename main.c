@@ -3,10 +3,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #define STR_LIMIT 512
-#define PROMPT "> "
-#define DELIMITER " \t|><&;\n"
-#define HOME getenv("HOME")
-#define USER getenv("USER")
 #define DEBUG
 
 char *cwd;
@@ -15,8 +11,10 @@ void getCommand()
 {
     //Variable to store users input. Set to hold a max of 512 characters
     char str[STR_LIMIT];
+    //Delimeter variable to tokenise string
+    char *delimiter = " \t|><&;\n";
     //Print out "> " and wait for user input
-    printf(PROMPT);
+    printf("> ");
     char *input = fgets(str, STR_LIMIT, stdin);
     //Check for ctrl + D input
     if (input == NULL)
@@ -25,7 +23,7 @@ void getCommand()
         exit(0);
     }
     //Tokenise user input using Delimeters
-    char *token = strtok(str, DELIMITER);
+    char *token = strtok(str, delimiter);
     while (token != NULL)
     {
         //Check if user inputs exit command
@@ -39,16 +37,16 @@ void getCommand()
         printf("%s", token);
         printf("\"\n");
         #endif
-        token = strtok(NULL, DELIMITER);
+        token = strtok(NULL, delimiter);
     }
 }
 
 int main()
 {
     //Set working directory to users home directory
-    cwd = HOME;
+    cwd = getenv("HOME");
     //Set user to the username of the user
-    user = USER;
+    user = getenv("USER");
     //Loop until the shell is terminated
     do
     {
