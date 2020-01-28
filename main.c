@@ -6,8 +6,26 @@
 #define STR_LIMIT 512
 #define DEBUG
 
-char *cwd;
-char *user;
+char* cwd;
+char* user;
+
+
+//Initialise shell
+void initShell(){
+    //Set working directory to users home directory
+    cwd = getenv("HOME");
+    //Change current directory to home path
+    chdir(cwd);
+    #ifdef
+    char* buff;
+    char* test = getcwd(buff,0); 
+    printf("%s",test);
+    #endif
+    //Set user to the username of the user
+    user = getenv("USER");
+
+}
+
 void getCommand()
 {
     //Variable to store users input. Set to hold a max of 512 characters
@@ -68,10 +86,8 @@ void executeArgs(char token) {
 
 int main()
 {
-    //Set working directory to users home directory
-    cwd = getenv("HOME");
-    //Set user to the username of the user
-    user = getenv("USER");
+    //Initialise shell
+    initShell();
     //Loop until the shell is terminated
     do
     {
