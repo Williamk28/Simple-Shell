@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include<sys/wait.h> 
 #define STR_LIMIT 512
 #define DEBUG
 
@@ -13,6 +14,8 @@ void getCommand()
     char str[STR_LIMIT];
     //Delimeter variable to tokenise string
     char *delimiter = " \t|><&;\n";
+    char *parsedArgs[STR_LIMIT];
+    int execflag = 1; 
     //Print out "> " and wait for user input
     printf("> ");
     char *input = fgets(str, STR_LIMIT, stdin);
@@ -31,6 +34,7 @@ void getCommand()
         {
             exit(0);
         }
+     //   execflag = processString(token,parsedArgs);
         //Check that tokens are correct
         #ifdef DEBUG
         printf("\"");
@@ -40,6 +44,27 @@ void getCommand()
         token = strtok(NULL, delimiter);
     }
 }
+
+void executeArgs(char token) {
+
+    pid_t pid = fork();
+
+    //Checking if the processID has failed
+    if(pid == -1) {
+        printf("\n Failed to fork the child process...");
+        return;     
+    } else if (pid == 0) {
+        if(execvp(parsed[0], parsed)) {
+            printf("\n Could not execute the command!");
+        }
+        exit(0);
+    } else {
+        wait(NULL);
+        return;
+    }
+
+}
+
 
 int main()
 {
