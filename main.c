@@ -16,7 +16,7 @@ void initShell(){
     cwd = getenv("HOME");
     //Change current directory to home path
     chdir(cwd);
-    #ifdef
+    #ifdef DEBUG
     char* buff;
     char* test = getcwd(buff,0); 
     printf("%s",test);
@@ -26,17 +26,17 @@ void initShell(){
 
 }
 
-void getCommand()
+char **getCommand()
 {
     //Variable to store users input. Set to hold a max of 512 characters
     char str[STR_LIMIT];
     //Delimeter variable to tokenise string
-    char *delimiter = " \t|><&;\n";
-    char *parsedArgs[STR_LIMIT];
+    char* delimiter = " \t|><&;\n";
+    char* parsedArgs[STR_LIMIT];
     int execflag = 1; 
     //Print out "> " and wait for user input
     printf("> ");
-    char *input = fgets(str, STR_LIMIT, stdin);
+    char* input = fgets(str, STR_LIMIT, stdin);
     //Check for ctrl + D input
     if (input == NULL)
     {
@@ -44,6 +44,8 @@ void getCommand()
         exit(0);
     }
     //Tokenise user input using Delimeters
+    int bufsize = 50, position = 0;
+    char **tokens = malloc(bufsize * sizeof(char*));
     char *token = strtok(str, delimiter);
     while (token != NULL)
     {
@@ -52,7 +54,8 @@ void getCommand()
         {
             exit(0);
         }
-     //   execflag = processString(token,parsedArgs);
+        tokens[position] = token;
+        position++;
         //Check that tokens are correct
         #ifdef DEBUG
         printf("\"");
@@ -61,27 +64,29 @@ void getCommand()
         #endif
         token = strtok(NULL, delimiter);
     }
+    tokens[position] = NULL;
+    return tokens;
 }
-
-void executeArgs(char token) {
-
-    pid_t pid = fork();
-
-    //Checking if the processID has failed
-    if(pid == -1) {
-        printf("\n Failed to fork the child process...");
-        return;     
-    } else if (pid == 0) {
-        if(execvp(parsed[0], parsed)) {
-            printf("\n Could not execute the command!");
-        }
-        exit(0);
-    } else {
-        wait(NULL);
-        return;
-    }
-
-}
+//Function where the system command is executed
+void execArgs(char **args)
+{ 
+    // Forking a child 
+    pid_t pid = fork();  
+  
+    if (pid == -1) { 
+        printf("\nFailed forking child.."); 
+        return; 
+    } else if (pid == 0) { 
+        if (execvp(args[0], args) < 0) {
+            printf("\nCould not execute command.."); 
+        } 
+        exit(0); 
+    } else { 
+        // waiting for child to terminate 
+        wait(NULL);  
+        return; 
+    } 
+} 
 
 
 int main()
@@ -94,6 +99,8 @@ int main()
         //Print user, current directory and prompt
         printf("%s: %s", user, cwd);
         //Get user input
-        getCommand();
+        char **args = getCommand();
+        //Execute external commands
+        execArgs(args);
     } while (1);
 }
