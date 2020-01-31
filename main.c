@@ -8,19 +8,17 @@
 
 char* cwd;
 char* user;
+char* path;
 
 
 //Initialise shell
 void initShell(){
+    //Set PATH variable
+    path = getenv("PATH");
     //Set working directory to users home directory
     cwd = getenv("HOME");
     //Change current directory to home path
     chdir(cwd);
-    #ifdef DEBUG
-    char* buff;
-    char* test = getcwd(buff,0); 
-    printf("%s",test);
-    #endif
     //Set user to the username of the user
     user = getenv("USER");
 
