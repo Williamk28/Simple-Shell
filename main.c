@@ -8,9 +8,12 @@
 
 char* cwd;
 char* user;
+char* path;
 
 //Initialise shell
 void initShell(){
+    //Set PATH variable
+    path = getenv("PATH");
     //Set working directory to users home directory
     cwd = getenv("HOME");
     //Change current directory to home path
@@ -67,6 +70,27 @@ char **tokenise(char *str)
     tokens[position] = NULL;
     return tokens;
 }
+//Function where the system command is executed
+void execArgs(char **args)
+{ 
+    // Forking a child 
+    pid_t pid = fork();  
+  
+    if (pid == -1) { 
+        printf("\nFailed forking child.."); 
+        return; 
+    } else if (pid == 0) { 
+        if (execvp(args[0], args) < 0) {
+            printf("\nCould not execute command.."); 
+        } 
+        exit(0); 
+    } else { 
+        // waiting for child to terminate 
+        wait(NULL);  
+        return; 
+    } 
+} 
+
 
 //Function where the system command is executed
 void execArgs(char **args)
