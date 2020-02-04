@@ -5,7 +5,7 @@
 #include<sys/wait.h> 
 #define STR_LIMIT 512
 #define DEBUG
-
+#define PATH getenv("PATH");
 char* cwd;
 char* user;
 char* path;
@@ -13,14 +13,14 @@ char* path;
 //Initialise shell
 void initShell(){
     //Set PATH variable
-    path = getenv("PATH");
+    path = PATH;
     //Set working directory to users home directory
     cwd = getenv("HOME");
     //Change current directory to home path
     chdir(cwd);
     #ifdef DEBUG
     char* buff;
-    char* test = getcwd(buff,0); 
+    char* test = getcwd(buff,5); 
     printf("%s",test);
     #endif
     //Set user to the username of the user
@@ -91,29 +91,6 @@ void execArgs(char **args)
     } 
 } 
 
-
-//Function where the system command is executed
-void execArgs(char **args)
-{ 
-    // Forking a child 
-    pid_t pid = fork();  
-  
-    if (pid == -1) { 
-        printf("\nFailed forking child.."); 
-        return; 
-    } else if (pid == 0) { 
-        if (execvp(args[0], args) < 0) {
-            printf("\nCould not execute command.."); 
-        } 
-        exit(0); 
-    } else { 
-        // waiting for child to terminate 
-        wait(NULL);  
-        return; 
-    } 
-} 
-
-
 int main()
 {
     //Initialise shell
@@ -121,6 +98,7 @@ int main()
     //Loop until the shell is terminated
     do
     {
+        printf("%s", path);
         //Print user, current directory and prompt
         printf("%s: %s", user, cwd);
         //Variable to store users input. Set to hold a max of 512 characters
