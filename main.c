@@ -18,11 +18,6 @@ void initShell(){
     cwd = getenv("HOME");
     //Change current directory to home path
     chdir(cwd);
-    #ifdef DEBUG
-    char* buff;
-    char* test = getcwd(buff,0); 
-    printf("%s",test);
-    #endif
     //Set user to the username of the user
     user = getenv("USER");
 
@@ -70,27 +65,6 @@ char **tokenise(char *str)
     tokens[position] = NULL;
     return tokens;
 }
-//Function where the system command is executed
-void execArgs(char **args)
-{ 
-    // Forking a child 
-    pid_t pid = fork();  
-  
-    if (pid == -1) { 
-        printf("\nFailed forking child.."); 
-        return; 
-    } else if (pid == 0) { 
-        if (execvp(args[0], args) < 0) {
-            printf("\nCould not execute command.."); 
-        } 
-        exit(0); 
-    } else { 
-        // waiting for child to terminate 
-        wait(NULL);  
-        return; 
-    } 
-} 
-
 
 //Function where the system command is executed
 void execArgs(char **args)
@@ -103,7 +77,7 @@ void execArgs(char **args)
         return; 
     } else if (pid == 0) { 
         if (execvp(args[0], args) < 0) {
-            printf("\nCould not execute command.."); 
+            printf("\nCould not execute command..\n"); 
         } 
         exit(0); 
     } else { 
@@ -111,8 +85,7 @@ void execArgs(char **args)
         wait(NULL);  
         return; 
     } 
-} 
-
+}
 
 int main()
 {
