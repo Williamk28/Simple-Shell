@@ -5,7 +5,6 @@
 #include<sys/wait.h> 
 #define STR_LIMIT 512
 #define DEBUG
-#define PATH getenv("PATH");
 char* cwd;
 char* user;
 char* path;
@@ -13,7 +12,7 @@ char* path;
 //Initialise shell
 void initShell(){
     //Set PATH variable
-    path = PATH;
+    path = getenv("PATH");
     //Set working directory to users home directory
     cwd = getenv("HOME");
     //Change current directory to home path
@@ -21,6 +20,15 @@ void initShell(){
     //Set user to the username of the user
     user = getenv("USER");
 
+}
+//Print out the current path 
+void getPath(){
+    printf("%s", getenv("PATH"));
+}
+
+//Set path using user input 
+void setPath(char* str){
+    setenv("PATH", str, 1);
 }
 
 void getInput(char *str) {
@@ -93,7 +101,6 @@ int main()
     //Loop until the shell is terminated
     do
     {
-        printf("%s", path);
         //Print user, current directory and prompt
         printf("%s: %s", user, cwd);
         //Variable to store users input. Set to hold a max of 512 characters
