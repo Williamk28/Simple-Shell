@@ -1,19 +1,33 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include<sys/wait.h> 
-#define STR_LIMIT 512
-#define DEBUG
-#define PATH getenv("PATH");
+#include "header.h"
+
 char* cwd;
 char* user;
 char* path;
 
+int main()
+{
+    //Initialise shell
+    initShell();
+    //Loop until the shell is terminated
+    do
+    {
+        printf("%s", path);
+        //Print user, current directory and prompt
+        printf("%s: %s", user, cwd);
+        //Variable to store users input. Set to hold a max of 512 characters
+        char str[STR_LIMIT];
+
+        //Get user input
+        getInput(str);
+        char **args = tokenise(str);
+        commandHandler(args);
+    } while (1);
+}
+
 //Initialise shell
 void initShell(){
     //Set PATH variable
-    path = PATH;
+    path = getenv("PATH");
     //Set working directory to users home directory
     cwd = getenv("HOME");
     //Change current directory to home path
@@ -65,6 +79,17 @@ char **tokenise(char *str)
     tokens[position] = NULL;
     return tokens;
 }
+
+void commandHandler(char **args) {
+    if (strcmp(args[0], "setpath") == 0) {
+        printf("setpath works\n");
+    } else if (strcmp(args[0], "cd") == 0) {
+        printf("cd works\n");
+    } else {
+        execArgs(args);
+    }
+}
+
 //Function where the system command is executed
 void execArgs(char **args)
 { 
@@ -86,23 +111,3 @@ void execArgs(char **args)
     } 
 } 
 
-int main()
-{
-    //Initialise shell
-    initShell();
-    //Loop until the shell is terminated
-    do
-    {
-        printf("%s", path);
-        //Print user, current directory and prompt
-        printf("%s: %s", user, cwd);
-        //Variable to store users input. Set to hold a max of 512 characters
-        char str[STR_LIMIT];
-
-        //Get user input
-        getInput(str);
-        char **args = tokenise(str);
-        //Execute external commands
-        execArgs(args);
-    } while (1);
-}
