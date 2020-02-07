@@ -36,6 +36,15 @@ void initShell(){
     user = getenv("USER");
 
 }
+//Print out the current path 
+void getPath(){
+    printf("%s", getenv("PATH"));
+}
+
+//Set path using user input 
+void setPath(char* str){
+    setenv("PATH", str, 1);
+}
 
 void getInput(char *str) {
 
@@ -109,5 +118,4 @@ void execArgs(char **args)
         wait(NULL);  
         return; 
     } 
-} 
-
+}
