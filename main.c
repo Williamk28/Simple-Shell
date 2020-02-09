@@ -38,7 +38,7 @@ void initShell(){
 }
 //Print out the current path 
 void getPath(){
-    printf("%s", getenv("PATH"));
+    printf("%s\n", getenv("PATH"));
 }
 
 //Set path using user input 
@@ -90,14 +90,31 @@ char **tokenise(char *str)
 }
 
 void commandHandler(char **args) {
+    //Check for built in commands
     if (strcmp(args[0], "setpath") == 0) {
-        printf("setpath works\n");
+        //If no path provided print error 
+        if(args[1] == NULL){
+            printf("Error : Please enter a path\n");
+        }else{
+        //Set path to user input 
+        setPath(args[1]);
+        }
     } else if (strcmp(args[0], "cd") == 0) {
+        //Check for NULL argument
+        if(args[1] == NULL){
+        changeDir(args[0]);
+        }
+        else{
+            changeDir(args[1]);
+        }
         printf("cd works\n");
-    } else {
+    } else if (strcmp(args[0], "getpath") == 0){
+        getPath();
+        }
+        else {
         execArgs(args);
     }
-}
+}   
 
 //Function where the system command is executed
 void execArgs(char **args)
