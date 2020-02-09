@@ -45,6 +45,18 @@ void getPath(){
 void setPath(char* str){
     setenv("PATH", str, 1);
 }
+//Set directory to user input
+void changeDir(char* path){
+    //If no arguments set directory to HOME
+    if(strcmp(path, "cd") == 0){
+        chdir(getenv("HOME"));
+        cwd = getenv("HOME");
+    }else{
+    //Set directory to user input 
+    chdir(path);
+    cwd = getcwd(NULL, 0);
+    }
+}
 
 void getInput(char *str) {
 
