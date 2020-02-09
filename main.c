@@ -11,7 +11,6 @@ int main()
     //Loop until the shell is terminated
     do
     {
-        printf("%s", path);
         //Print user, current directory and prompt
         printf("%s: %s", user, cwd);
         //Variable to store users input. Set to hold a max of 512 characters
@@ -32,33 +31,13 @@ void initShell(){
     cwd = getenv("HOME");
     //Change current directory to home path
     chdir(cwd);
+    //Prints error message if home directory fails to set
+    if(strcmp(getcwd(NULL, 0),cwd) != 0) {
+        printf("Error setting HOME directory.");
+    }
     //Set user to the username of the user
     user = getenv("USER");
 
-}
-//Print out the current path 
-void getPath(){
-    printf("%s\n", getenv("PATH"));
-}
-
-//Set path using user input 
-void setPath(char* str){
-    setenv("PATH", str, 1);
-}
-//Set directory to user input
-void changeDir(char* path){
-    //If no arguments set directory to HOME
-    if(strcmp(path, "cd") == 0){
-        chdir(getenv("HOME"));
-        cwd = getenv("HOME");
-    }
-    else{
-    //Set directory to user input 
-    if (chdir(path)!= 0){
-        perror("File Path unknown");
-    }
-    cwd = getcwd(NULL, 0);
-    }
 }
 
 void getInput(char *str) {
@@ -114,6 +93,8 @@ void commandHandler(char **args) {
         //Set path to user input 
         setPath(args[1]);
         }
+    } else if (strcmp(args[0], "getpath") == 0){
+        getPath();
     } else if (strcmp(args[0], "cd") == 0) {
         //Check for NULL argument
         if(args[1] == NULL){
@@ -121,15 +102,38 @@ void commandHandler(char **args) {
         }
         else{
             changeDir(args[1]);
-        }
-        printf("cd works\n");
-    } else if (strcmp(args[0], "getpath") == 0){
-        getPath();
-        }
-        else {
+        } 
+    } else {
         execArgs(args);
     }
-}   
+}
+
+//Set path using user input 
+void setPath(char* str){
+    setenv("PATH", str, 1);
+}
+
+//Print out the current path 
+void getPath(){
+    printf("%s\n", getenv("PATH"));
+}
+
+
+//Set directory to user input
+void changeDir(char* path){
+    //If no arguments set directory to HOME
+    if(strcmp(path, "cd") == 0){
+        chdir(getenv("HOME"));
+        cwd = getenv("HOME");
+    }
+    else{
+    //Set directory to user input 
+    if (chdir(path)!= 0){
+        perror("File Path unknown");
+    }
+    cwd = getcwd(NULL, 0);
+    }
+}
 
 //Function where the system command is executed
 void execArgs(char **args)

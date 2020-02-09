@@ -10,4 +10,7 @@ void initShell();
 void getInput(char *str);
 char **tokenise(char *str);
 void commandHandler(char **args);
+void setPath(char* str);
+void getPath();
+void changeDir(char* path);
 void execArgs(char **args);
