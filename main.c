@@ -51,9 +51,12 @@ void changeDir(char* path){
     if(strcmp(path, "cd") == 0){
         chdir(getenv("HOME"));
         cwd = getenv("HOME");
-    }else{
+    }
+    else{
     //Set directory to user input 
-    chdir(path);
+    if (chdir(path)!= 0){
+        perror("File Path unknown");
+    }
     cwd = getcwd(NULL, 0);
     }
 }
