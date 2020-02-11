@@ -45,18 +45,6 @@ void getPath(){
 void setPath(char* str){
     setenv("PATH", str, 1);
 }
-//Set directory to user input
-void changeDir(char* path){
-    //If no arguments set directory to HOME
-    if(strcmp(path, "cd") == 0){
-        chdir(getenv("HOME"));
-        cwd = getenv("HOME");
-    }else{
-    //Set directory to user input 
-    chdir(path);
-    cwd = getcwd(NULL, 0);
-    }
-}
 
 void getInput(char *str) {
 
@@ -111,15 +99,6 @@ void commandHandler(char **args) {
         //Set path to user input 
         setPath(args[1]);
         }
-    } else if (strcmp(args[0], "cd") == 0) {
-        //Check for NULL argument
-        if(args[1] == NULL){
-        changeDir(args[0]);
-        }
-        else{
-            changeDir(args[1]);
-        }
-        printf("cd works\n");
     } else if (strcmp(args[0], "getpath") == 0){
         getPath();
         }
@@ -139,7 +118,7 @@ void execArgs(char **args)
         return; 
     } else if (pid == 0) { 
         if (execvp(args[0], args) < 0) {
-            printf("\nCould not execute command..\n"); 
+            perror(args[0]);
         } 
         exit(0); 
     } else { 
