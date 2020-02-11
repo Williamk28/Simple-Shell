@@ -3,6 +3,9 @@
 char* cwd;
 char* user;
 char* path;
+//Initializing the historys starting count
+int Hist_numb = 0;
+int count = 0;
 
 int main()
 {
@@ -13,18 +16,25 @@ int main()
     {
         //Print user, current directory and prompt
         printf("%s: %s", user, cwd);
+
+        //Decelerations
         //Variable to store users input. Set to hold a max of 512 characters
         char str[STR_LIMIT];
 
+
+
         //Get user input
         getInput(str);
+        strcpy(hist[Hist_numb], str); 
+        Hist_numb  = (Hist_numb + 1) % 20;
+        count++;
         char **args = tokenise(str);
         commandHandler(args);
     } while (1);
 }
 
 //Initialise shell
-void initShell(){
+void initShell(){   
     //Set PATH variable
     path = getenv("PATH");
     //Set working directory to users home directory
@@ -68,7 +78,7 @@ char **tokenise(char *str)
         if (strcmp("exit", token) == 0)
         {
             exit(0);
-        }
+        }   
         tokens[position] = token;
         position++;
         //Check that tokens are correct
@@ -84,8 +94,11 @@ char **tokenise(char *str)
 }
 
 void commandHandler(char **args) {
+    if (strcmp(args[0], "!") == 0) {
+        execHistory(args);
+    }
     //Check for built in commands
-    if (strcmp(args[0], "setpath") == 0) {
+   else if (strcmp(args[0], "setpath") == 0) {
         //If no path provided print error 
         if(args[1] == NULL){
             printf("Error : Please enter a path\n");
@@ -154,4 +167,13 @@ void execArgs(char **args)
         wait(NULL);  
         return; 
     } 
+}
+
+void execHistory(char **args) {
+   char  **temp;
+     if(strcmp(args[0], "!!") == 0){
+         Printf("Executing last command")
+         temp = tokenise(hist[count-2]);
+         commandHandler(temp);
+     }
 }
