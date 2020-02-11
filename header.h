@@ -22,3 +22,7 @@ int getPath();
 int setPath(char* str);
 void changeDir(char* path, EnvVars *envVars);
 int execExternal(char **args);
+void execHistory(char **args);
+//Defining history structure
+   int Hist_numb;
+   char hist[20][512];

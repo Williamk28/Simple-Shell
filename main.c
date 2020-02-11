@@ -2,7 +2,6 @@
 
 int Hist_numb = 0;
 int count = 0;
-char *hist;
 
 int main() {
     
