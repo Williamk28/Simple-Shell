@@ -129,7 +129,7 @@ void changeDir(char* path){
     else{
     //Set directory to user input 
     if (chdir(path)!= 0){
-        perror("File Path unknown");
+        perror(path);
     }
     cwd = getcwd(NULL, 0);
     }
