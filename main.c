@@ -94,11 +94,14 @@ char **tokenise(char *str)
 }
 
 void commandHandler(char **args) {
-    if (strcmp(args[0], "!") == 0) {
+        //Check for built in commands
+    if (strcspn(args[0], "!") == 0) {
         execHistory(args);
-    }
-    //Check for built in commands
-   else if (strcmp(args[0], "setpath") == 0) {
+    }  else if(strcmp(args[0], "history") == 0) { 
+        for(int i=0; i <= count-1 && count-1 <= 20; i++) {
+            printf("Command:%d %s",i+1,hist[i]);
+        }
+    } else if (strcmp(args[0], "setpath") == 0) {
         //If no path provided print error 
         if(args[1] == NULL){
             printf("Error : Please enter a path\n");
@@ -163,7 +166,7 @@ void execArgs(char **args)
         } 
         exit(0); 
     } else { 
-        // waiting for child to terminate 
+        // waiting for child to terminate
         wait(NULL);  
         return; 
     } 
@@ -172,8 +175,37 @@ void execArgs(char **args)
 void execHistory(char **args) {
    char  **temp;
      if(strcmp(args[0], "!!") == 0){
-         Printf("Executing last command")
+         printf("Executing last command\n");
          temp = tokenise(hist[count-2]);
          commandHandler(temp);
-     }
-}
+
+
+         } else if(args[0][1] == 45 ) {
+         if(args[0][2] >= 48 && args[0][2] <= 57) {
+         int value =  (count - 1) - ((args[0][2])-48);
+         if(value <= count-1 && value >= 0) { 
+         temp = tokenise(hist[value]);
+         commandHandler(temp);
+         } else {
+           printf("You cannot select a value out of range of the history!");
+           count = count - 1;
+           Hist_numb = Hist_numb - 1;
+       }
+     } else {
+              printf("You need to enter an integer value between 0-9  \n");
+       } 
+    
+     }  else if(args[0][1] >= 48 && args[0][1] <= 57) {
+         int value = (args[0][1])-49;
+         if(value <= count-1 && value >= 0) { 
+         temp = tokenise(hist[value]);
+         commandHandler(temp);
+     } else {
+         printf("You cannot select a value out of range of the history! \n");
+              count = count - 1;
+               Hist_numb = Hist_numb - 1;
+       } 
+     } else {
+              printf("You need to enter an integer value between 0-9  \n");
+       }
+  }  
