@@ -14,3 +14,8 @@ void setPath(char* str);
 void getPath();
 void changeDir(char* path);
 void execArgs(char **args);
+void execHistory(char **args);
+
+//Defining history structure
+   int Hist_numb;
+   char hist[20][512];
