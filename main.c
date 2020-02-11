@@ -118,6 +118,10 @@ int executeCommand(char **args, EnvVars *envVars) {
         changeDir(args[1], envVars);
     } else if (strcmp(args[0], "!") == 0) {
         execHistory(args);
+    } else if(strcmp(args[0], "history") == 0) { 
+        for(int i=0; i <= count-1 && count-1 <= 20; i++) {
+            printf("Command:%d %s",i+1,hist[i]);
+        }
     }
     else {
         return execExternal(args);
@@ -171,8 +175,37 @@ int execExternal(char **args)
 void execHistory(char **args) {
    char  **temp;
      if(strcmp(args[0], "!!") == 0){
-         Printf("Executing last command");
+         printf("Executing last command\n");
          temp = tokenise(hist[count-2]);
          commandHandler(temp);
-     }
-}
+
+
+         } else if(args[0][1] == 45 ) {
+         if(args[0][2] >= 48 && args[0][2] <= 57) {
+         int value =  (count - 1) - ((args[0][2])-48);
+         if(value <= count-1 && value >= 0) { 
+         temp = tokenise(hist[value]);
+         commandHandler(temp);
+         } else {
+           printf("You cannot select a value out of range of the history!");
+           count = count - 1;
+           Hist_numb = Hist_numb - 1;
+       }
+     } else {
+              printf("You need to enter an integer value between 0-9  \n");
+       } 
+    
+     }  else if(args[0][1] >= 48 && args[0][1] <= 57) {
+         int value = (args[0][1])-49;
+         if(value <= count-1 && value >= 0) { 
+         temp = tokenise(hist[value]);
+         commandHandler(temp);
+     } else {
+         printf("You cannot select a value out of range of the history! \n");
+              count = count - 1;
+               Hist_numb = Hist_numb - 1;
+       } 
+     } else {
+              printf("You need to enter an integer value between 0-9  \n");
+       }
+  }  
