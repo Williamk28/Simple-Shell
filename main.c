@@ -1,5 +1,9 @@
 #include "header.h"
 
+int Hist_numb = 0;
+int count = 0;
+char *hist;
+
 int main() {
     
     EnvVars envVars;
@@ -33,10 +37,14 @@ void loopShell(EnvVars *envVars) {
     char *input;
     char **args;
     int status;
+    
 
     do {
         printf("%s: %s> ", envVars->user, envVars->cwd);
         input = readInput();
+        strcpy(hist[Hist_numb], input); 
+        Hist_numb  = (Hist_numb + 1) % 20;
+        count++;
         args = tokeniseInput(input);
         status = executeCommand(args, envVars);
 
@@ -109,6 +117,8 @@ int executeCommand(char **args, EnvVars *envVars) {
 
     } else if(strcmp(args[0], "cd") == 0) {
         changeDir(args[1], envVars);
+    } else if (strcmp(args[0], "!") == 0) {
+        execHistory(args);
     }
     else {
         return execExternal(args);
@@ -158,3 +168,12 @@ int execExternal(char **args)
     }
     return 1;
 } 
+
+void execHistory(char **args) {
+   char  **temp;
+     if(strcmp(args[0], "!!") == 0){
+         Printf("Executing last command");
+         temp = tokenise(hist[count-2]);
+         commandHandler(temp);
+     }
+}
