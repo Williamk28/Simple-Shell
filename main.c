@@ -1,58 +1,83 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include<sys/wait.h> 
-#define STR_LIMIT 512
-#define DEBUG
+#include "header.h"
 
-char* cwd;
-char* user;
+int main() {
+    EnvVars envVars;
 
-//Initialise shell
-void initShell(){
-    //Set working directory to users home directory
-    cwd = getenv("HOME");
-    //Change current directory to home path
-    chdir(cwd);
-    #ifdef DEBUG
-    char* buff;
-    char* test = getcwd(buff,0); 
-    printf("%s",test);
-    #endif
-    //Set user to the username of the user
-    user = getenv("USER");
+    initShell(&envVars);
 
+    loopShell(&envVars);
+
+    //exitShell();
+
+    return EXIT_SUCCESS;
 }
 
-void getInput(char *str) {
+void initShell(EnvVars *envVars) {
 
-    //Print out "> " and wait for user input
-    printf("> ");
-    char *input = fgets(str, STR_LIMIT, stdin);
+    envVars->cwd = getenv("HOME");
+    envVars->user = getenv("USER");
 
-    //Check for ctrl + D input
-    if (input == NULL)
-    {
+    chdir(envVars->cwd);
+
+    if(strcmp(getcwd(NULL, 0), envVars->cwd) != 0) {
+        printf("Error setting HOME directory.");
+    }
+
+    #ifdef DEBUG
+    printf("Home Directory: %s\n",getcwd(NULL,0));
+    #endif
+}
+
+void loopShell(EnvVars *envVars) {
+    char *input;
+    char **args;
+    int status;
+
+    do {
+        printf("%s: %s> ", envVars->user, envVars->cwd);
+        input = readInput();
+        args = tokeniseInput(input);
+        status = executeCommand(args, envVars);
+
+        free(input);
+        free(args);
+    } while (1);
+}
+
+char *readInput() {
+    char *str = malloc(sizeof(char) * MAX_COMMAND_LENGTH);
+
+    if (!str) {
+        fprintf(stderr, "Error: allocation error\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if (fgets(str, MAX_COMMAND_LENGTH, stdin) == NULL) {
         printf("\n");
-        exit(0);
+        exit(EXIT_SUCCESS);
+    } else {
+        return str;
     }
 }
 
-char **tokenise(char *str)
+char **tokeniseInput(char *input)
 {
     //Tokenise user input using delimiters
-    int bufsize = 50, position = 0;
-    //Delimiter variable to tokenise string
-    char* delimiter = " \t|><&;\n";
-    char **tokens = malloc(bufsize * sizeof(char*));
-    char *token = strtok(str, delimiter);
-    while (token != NULL)
-    {
+    int position = 0;
+    char **tokens = malloc(sizeof(char*) * MAX_TOK_NO);
+    char *token;
+
+    if (!tokens) {
+        fprintf(stderr, "Error: allocation error\n");
+        exit(EXIT_FAILURE);
+    }
+
+    token = strtok(input, TOK_DELIM);
+    while (token != NULL) {
         //Check if user inputs exit command
         if (strcmp("exit", token) == 0)
         {
-            exit(0);
+            exit(EXIT_SUCCESS);
         }
         tokens[position] = token;
         position++;
@@ -62,50 +87,63 @@ char **tokenise(char *str)
         printf("%s", token);
         printf("\"\n");
         #endif
-        token = strtok(NULL, delimiter);
+        token = strtok(NULL, TOK_DELIM);
     }
     tokens[position] = NULL;
     return tokens;
 }
 
+int executeCommand(char **args, EnvVars *envVars) {
+
+    if(args[0] == NULL) {
+        return 1;
+    }
+
+    if(strcmp(args[0], "getpath") == 0) {
+        return getPath();
+    } else if(strcmp(args[0], "setpath") == 0) {
+
+        if(args[1] == NULL) {
+            printf("Error: Missing path argument\n");
+            return 1;
+        }
+        return setPath(args[1]);
+
+    }
+    else {
+        execExternal(args);
+    }   
+}
+
+int getPath() {
+    printf("%s\n", getenv("PATH"));
+    return 1;
+}
+
+int setPath(char *arg) {
+    setenv("PATH", arg, 1);
+    return 1;
+}
+
 //Function where the system command is executed
-void execArgs(char **args)
+int execExternal(char **args)
 { 
     // Forking a child 
-    pid_t pid = fork();  
-  
-    if (pid == -1) { 
-        printf("\nFailed forking child.."); 
-        return; 
-    } else if (pid == 0) { 
-        if (execvp(args[0], args) < 0) {
-            printf("\nCould not execute command.."); 
-        } 
-        exit(0); 
-    } else { 
-        // waiting for child to terminate 
-        wait(NULL);  
-        return; 
-    } 
+    pid_t pid, wpid;
+    int status;
+    
+    pid = fork();
+    if(pid == 0) {
+        if (execvp(args[0], args) == -1) {
+            perror("Shell");
+        }
+        exit(EXIT_FAILURE);
+    } else if (pid < 0) {
+        perror("Shell");
+    } else {
+        do {
+            wpid = waitpid(pid, &status, WUNTRACED);
+        } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+    }
+    return 1;
 } 
-
-
-int main()
-{
-    //Initialise shell
-    initShell();
-    //Loop until the shell is terminated
-    do
-    {
-        //Print user, current directory and prompt
-        printf("%s: %s", user, cwd);
-        //Variable to store users input. Set to hold a max of 512 characters
-        char str[STR_LIMIT];
-
-        //Get user input
-        getInput(str);
-        char **args = tokenise(str);
-        //Execute external commands
-        execArgs(args);
-    } while (1);
-}
