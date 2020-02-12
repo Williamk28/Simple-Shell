@@ -15,6 +15,11 @@ typedef struct Env_vars {
     char *user;
 } Env_vars;
 
+typedef struct {
+    char alias[MAX_COMMAND_LENGTH];
+    char command[MAX_COMMAND_LENGTH];
+} Alias_Struct
+
 void init_shell(Env_vars *env_vars);
 void loop_shell(Env_vars *env_vars);
 char *read_input();
@@ -30,3 +35,5 @@ void exec_history(char **args, Env_vars *env_vars);
 //Defining history structure
    int Hist_numb;
    char hist[20][512];
+
+int NumOfAliases = 0;
