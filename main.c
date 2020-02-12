@@ -98,7 +98,7 @@ void commandHandler(char **args) {
         execHistory(args);
     }  else if(strcmp(args[0], "history") == 0) { 
         printf("Executing history! \n");
-        for(int i=0; i <= count-1 && count-1 <= 20; i++) {
+         for(int i=0; i <= count-1 && i < 20; i++) {
             printf("Command %d: %s",i+1,hist[i]);
         }    
        // printf("Command 4: %s",hist[3]);
