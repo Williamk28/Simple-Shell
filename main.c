@@ -1,6 +1,7 @@
 #include "header.h"
 
 int main() {
+    
     EnvVars envVars;
 
     initShell(&envVars);
@@ -62,7 +63,6 @@ char *readInput() {
 
 char **tokeniseInput(char *input)
 {
-    //Tokenise user input using delimiters
     int position = 0;
     char **tokens = malloc(sizeof(char*) * MAX_TOK_NO);
     char *token;
@@ -74,14 +74,12 @@ char **tokeniseInput(char *input)
 
     token = strtok(input, TOK_DELIM);
     while (token != NULL) {
-        //Check if user inputs exit command
         if (strcmp("exit", token) == 0)
         {
             exit(EXIT_SUCCESS);
         }
         tokens[position] = token;
         position++;
-        //Check that tokens are correct
         #ifdef DEBUG
         printf("\"");
         printf("%s", token);
@@ -109,9 +107,11 @@ int executeCommand(char **args, EnvVars *envVars) {
         }
         return setPath(args[1]);
 
+    } else if(strcmp(args[0], "cd") == 0) {
+        changeDir(args[1], envVars);
     }
     else {
-        execExternal(args);
+        return execExternal(args);
     }   
 }
 
@@ -125,10 +125,21 @@ int setPath(char *arg) {
     return 1;
 }
 
-//Function where the system command is executed
+void changeDir(char *arg, EnvVars *envVars) {
+    if(arg == NULL) {
+        chdir(getenv("HOME"));
+        envVars->cwd = getenv("HOME");
+    } else {
+
+    if (chdir(arg)!= 0){
+        perror(arg);
+    }
+    envVars->cwd = getcwd(NULL, 0);
+    }
+}
+
 int execExternal(char **args)
 { 
-    // Forking a child 
     pid_t pid, wpid;
     int status;
     
