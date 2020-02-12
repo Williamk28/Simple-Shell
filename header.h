@@ -13,6 +13,11 @@ typedef struct {
     char *user;
 } EnvVars;
 
+typedef struct {
+    char alias[MAX_COMMAND_LENGTH];
+    char command[MAX_COMMAND_LENGTH];
+} Alias_Struct
+
 void initShell(EnvVars *envVars);
 void loopShell(EnvVars *envVars);
 char *readInput();
@@ -22,3 +27,5 @@ int getPath();
 int setPath(char* str);
 void changeDir(char* path, EnvVars *envVars);
 int execExternal(char **args);
+
+int NumOfAliases = 0;
