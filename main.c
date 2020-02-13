@@ -119,9 +119,18 @@ int executeCommand(char **args, EnvVars *envVars) {
     } else if (strcmp(args[0], "!") == 0) {
         execHistory(args);
     } else if(strcmp(args[0], "history") == 0) { 
-        for(int i=0; i <= count-1 && count-1 <= 20; i++) {
-            printf("Command:%d %s",i+1,hist[i]);
-        }
+        printf("Executing history! \n");
+        if(count < 20) {
+         for(int i=0; i <= count-1; i++) {
+            printf("Command %d: %s",i+1,hist[i]);
+           }
+          } else { 
+               for(int i=0; i < 20; i++) {
+                   printf("Command %d: %s",i+1,hist[Hist_numb]);
+                   Hist_numb = (Hist_numb + 1) % 20;
+               }
+           }
+       // printf("Command 4: %s",hist[3]);
     }
     else {
         return execExternal(args);
@@ -200,7 +209,7 @@ void execHistory(char **args) {
      }  else if(args[0][1] >= 48 && args[0][1] <= 57) {
          int value = (args[0][1])-49;
          if(value < count-1 && value >= 0) { 
-         strcpy(hist[count-1], hist[value]); 
+         strcpy(hist[Hist_numb-1], hist[value-1]); 
          temp = tokenise(hist[value]);
          commandHandler(temp);
      } else {
