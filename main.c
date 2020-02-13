@@ -20,7 +20,11 @@ void init_shell(Env_vars *env_vars) {
     env_vars->cwd = getenv("HOME");
     env_vars->user = getenv("USER");
 
-    if (0 != chdir(env_vars->cwd)) perror("Shell");
+    if (0 != chdir(env_vars->cwd)) {
+        bred();
+        perror("Shell");
+        resetColor();
+    }
 
     #ifdef DEBUG
         printf("Home Directory: %s\n",getcwd(NULL,0));
@@ -32,7 +36,12 @@ void loop_shell(Env_vars *env_vars) {
     char **args;
     
     do {
-        printf("%s: %s> ", env_vars->user, env_vars->cwd);
+        bgreen();
+        printf("%s: ", env_vars->user);
+        bblue();
+        printf("%s> ", env_vars->cwd);
+        resetColor();
+        
         input = read_input();
         add_history(input);
         args = tokenise_input(input);
@@ -47,7 +56,9 @@ char *read_input() {
     char *str = malloc(sizeof(char) * MAX_COMMAND_LENGTH);
 
     if (!str) {
+        bred();
         fprintf(stderr, MEM_ALLOC_ERROR);
+        resetColor();
         exit(EXIT_FAILURE);
     } else if (NULL == fgets(str, MAX_COMMAND_LENGTH, stdin)) {
         printf("\n");
@@ -69,7 +80,9 @@ char **tokenise_input(char *input) {
     char *token;
 
     if (!tokens) {
+        bred();
         fprintf(stderr, MEM_ALLOC_ERROR);
+        resetColor();
         exit(EXIT_FAILURE);
     }
 
