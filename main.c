@@ -98,9 +98,16 @@ void commandHandler(char **args) {
         execHistory(args);
     }  else if(strcmp(args[0], "history") == 0) { 
         printf("Executing history! \n");
-         for(int i=0; i <= count-1 && i < 20; i++) {
+        if(count < 20) {
+         for(int i=0; i <= count-1; i++) {
             printf("Command %d: %s",i+1,hist[i]);
-        }    
+           }
+          } else { 
+               for(int i=0; i < 20; i++) {
+                   printf("Command %d: %s",i+1,hist[Hist_numb]);
+                   Hist_numb = (Hist_numb + 1) % 20;
+               }
+           }
        // printf("Command 4: %s",hist[3]);
     } else if (strcmp(args[0], "setpath") == 0) {
         //If no path provided print error 
@@ -201,7 +208,7 @@ void execHistory(char **args) {
      }  else if(args[0][1] >= 48 && args[0][1] <= 57) {
          int value = (args[0][1])-49;
          if(value < count-1 && value >= 0) { 
-         strcpy(hist[count-1], hist[value]); 
+         strcpy(hist[Hist_numb-1], hist[value-1]); 
          temp = tokenise(hist[value]);
          commandHandler(temp);
      } else {
