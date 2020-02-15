@@ -181,24 +181,34 @@ int execExternal(char **args)
     return 1;
 } 
 
+//Tokenise Method breaking history.
 void execHistory(char **args) {
+    //Holds the return from tokenise
    char  **temp;
+   //Holds the value  of input from ! to compare when using array 
     int value;
+    //Creates a copy to allows to trash the array without effecting main array
+    char TempValue[1][512];
    //This is for !!
      if(strcmp(args[0], "!!") == 0){
          printf("Executing last command\n");
          if(Hist_numb == 0) { 
               strcpy(hist[19], hist[18]); 
-              temp = tokenise(hist[19]);
+         strcpy(TempValue[0], hist[19]); 
+        temp = tokenise(TempValue[0]);
          } else if(Hist_numb == 1) { 
               strcpy(hist[0], hist[19]); 
-              temp = tokenise(hist[0]);
+            strcpy(TempValue[0], hist[0]); 
+        temp = tokenise(TempValue[0]);
          } else {
          strcpy(hist[Hist_numb-1], hist[Hist_numb-2]); 
-            temp = tokenise(hist[Hist_numb-1]);
+                  strcpy(TempValue[0], hist[Hist_numb-1]); 
+        temp = tokenise(TempValue[0]);
          }
+
         commandHandler(temp);
-           //This is for !- 
+        return;
+           //This is for !-<no>
          } else if(args[0][1] == 45 ) {
          if(args[0][2] >= 48 && args[0][2] <= 57) {
              if(args[0][3] == 0) {
@@ -219,8 +229,10 @@ void execHistory(char **args) {
              } else { 
              strcpy(hist[Hist_numb-1], hist[value]); 
              }
-             temp = tokenise(hist[value]);
-             commandHandler(temp);
+        strcpy(TempValue[0], hist[value]); 
+        temp = tokenise(TempValue[0]);
+        commandHandler(temp);
+        return;
          } else {
            printf("You cannot select a value out of range of the history!\n");
            if(Hist_numb == 0) {
@@ -230,11 +242,21 @@ void execHistory(char **args) {
             count = count - 1;
             Hist_numb = Hist_numb - 1;
            }
+           return;
        }
-     } else {
-              printf("You need to enter an integer value between 0-9  \n");
-       } 
-        //This is for if just !
+     }  else {
+        printf("Please enter a integer command! e.g. !2 , !-2, !! \n");
+           if(Hist_numb == 0) {
+              count = count - 1;
+              Hist_numb = 19;
+           } else {
+            count = count - 1;
+            Hist_numb = Hist_numb - 1;
+           }
+           return;
+       }
+     
+        //This is for if just !<no>
      }  else if(args[0][1] >= 48 && args[0][1] <= 57) {
          if(args[0][2] == 0) {
            value = (args[0][1])-49;
@@ -247,8 +269,10 @@ void execHistory(char **args) {
              } else {
          strcpy(hist[Hist_numb-1], hist[value]); 
              }
-         temp = tokenise(hist[value]);
-         commandHandler(temp);
+        strcpy(TempValue[0], hist[value]); 
+        temp = tokenise(TempValue[0]);
+        commandHandler(temp);
+        return;
      } else {
          printf("You cannot select a value out of range of the history! \n");
            if(Hist_numb == 0) {
@@ -258,9 +282,19 @@ void execHistory(char **args) {
             count = count - 1;
             Hist_numb = Hist_numb - 1;
            }
+           return;
        } 
-     } else {
-              printf("You need to enter an integer value between 0-9  \n");
-              
+       } else {
+               if(args[0][1] <= 48 || args[0][1] >= 57 ) {
+        printf("Please enter a integer command! e.g. !2 , !-2, !! \n");
+           if(Hist_numb == 0) {
+              count = count - 1;
+              Hist_numb = 19;
+           } else {
+            count = count - 1;
+            Hist_numb = Hist_numb - 1;
+           }
+           return;
+        }
        }
   }  
