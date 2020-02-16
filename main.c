@@ -116,7 +116,7 @@ int executeCommand(char **args, EnvVars *envVars) {
 
     } else if(strcmp(args[0], "cd") == 0) {
         changeDir(args[1], envVars);
-    } else if (strcmp(args[0], "!") == 0) {
+    } else if (strcspn(args[0], "!") == 0) {
         execHistory(args, envVars);
     } else if(strcmp(args[0], "history") == 0) { 
         printf("Executing history! \n");
