@@ -17,11 +17,13 @@ typedef struct Env_vars {
 void init_shell(Env_vars *env_vars);
 void loop_shell(Env_vars *env_vars);
 char *read_input();
+void add_history(char *input);
 char **tokenise_input(char *input);
-int execute_command(char **args, Env_vars *env_vars);
+void execute_command(char **args, Env_vars *env_vars);
 int getPath();
 void set_path(char* str);
 void change_dir(char* path, Env_vars *env_vars);
+void history();
 int exec_external(char **args);
 void exec_history(char **args, Env_vars *env_vars);
 //Defining history structure

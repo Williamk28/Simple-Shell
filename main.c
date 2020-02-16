@@ -91,7 +91,7 @@ char **tokenise_input(char *input) {
     return tokens;
 }
 
-int execute_command(char **args, Env_vars *env_vars) {
+void execute_command(char **args, Env_vars *env_vars) {
 
     if(args[0] == NULL) {
         return;
@@ -106,17 +106,17 @@ int execute_command(char **args, Env_vars *env_vars) {
     } else if(strcmp(args[0], "history") == 0) { 
         history();        
     } else {
-        return exec_external(args);
+        exec_external(args);
     }   
 }
 
-void set_path(char *args) {
-    if (args[1] == NULL) printf("Error: Missing path argument\n"); 
-    if (0 != setenv("PATH", args, 1)) perror("Shell");
+void set_path(char *arg) {
+    if (NULL == arg) printf("Error: Missing path argument\n"); 
+    if (0 != setenv("PATH", arg, 1)) perror("Shell");
 }
 
 void change_dir(char *arg, Env_vars *env_vars) {
-    if(arg == NULL) {
+    if(NULL == arg) {
         if (0 != chdir(getenv("HOME"))) {
             perror("Shell");
         } else {
@@ -146,8 +146,7 @@ void history() {
 }
 
 
-int exec_external(char **args)
-{ 
+int exec_external(char **args){ 
     pid_t pid, wpid;
     int status;
     
