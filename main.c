@@ -5,62 +5,51 @@ int count = 0;
 
 int main() {
     
-    EnvVars envVars;
+    Env_vars env_vars;
 
-    initShell(&envVars);
+    init_shell(&env_vars);
 
-    loopShell(&envVars);
+    loop_shell(&env_vars);
 
     //exitShell();
 
     return EXIT_SUCCESS;
 }
 
-void initShell(EnvVars *envVars) {
+void init_shell(Env_vars *env_vars) {
+    env_vars->cwd = getenv("HOME");
+    env_vars->user = getenv("USER");
 
-    envVars->cwd = getenv("HOME");
-    envVars->user = getenv("USER");
-
-    chdir(envVars->cwd);
-
-    if(strcmp(getcwd(NULL, 0), envVars->cwd) != 0) {
-        printf("Error setting HOME directory.");
-    }
+    if (0 != chdir(env_vars->cwd)) perror("Shell");
 
     #ifdef DEBUG
-    printf("Home Directory: %s\n",getcwd(NULL,0));
+        printf("Home Directory: %s\n",getcwd(NULL,0));
     #endif
 }
 
-void loopShell(EnvVars *envVars) {
+void loop_shell(Env_vars *env_vars) {
     char *input;
     char **args;
-    int status;
     
-
     do {
-        printf("%s: %s> ", envVars->user, envVars->cwd);
-        input = readInput();
-        strcpy(hist[Hist_numb], input); 
-        Hist_numb  = (Hist_numb + 1) % 20;
-        count++;
-        args = tokeniseInput(input);
-        status = executeCommand(args, envVars);
+        printf("%s: %s> ", env_vars->user, env_vars->cwd);
+        input = read_input();
+        add_history(input);
+        args = tokenise_input(input);
+        execute_command(args, env_vars);
 
         free(input);
         free(args);
     } while (1);
 }
 
-char *readInput() {
+char *read_input() {
     char *str = malloc(sizeof(char) * MAX_COMMAND_LENGTH);
 
     if (!str) {
-        fprintf(stderr, "Error: allocation error\n");
+        fprintf(stderr, MEM_ALLOC_ERROR);
         exit(EXIT_FAILURE);
-    }
-
-    if (fgets(str, MAX_COMMAND_LENGTH, stdin) == NULL) {
+    } else if (NULL == fgets(str, MAX_COMMAND_LENGTH, stdin)) {
         printf("\n");
         exit(EXIT_SUCCESS);
     } else {
@@ -68,121 +57,120 @@ char *readInput() {
     }
 }
 
-char **tokeniseInput(char *input)
-{
+void add_history(char *input) {
+    strcpy(hist[Hist_numb], input); 
+    Hist_numb  = (Hist_numb + 1) % 20;
+    count++;
+}
+
+char **tokenise_input(char *input) {
     int position = 0;
     char **tokens = malloc(sizeof(char*) * MAX_TOK_NO);
     char *token;
 
     if (!tokens) {
-        fprintf(stderr, "Error: allocation error\n");
+        fprintf(stderr, MEM_ALLOC_ERROR);
         exit(EXIT_FAILURE);
     }
 
     token = strtok(input, TOK_DELIM);
-    while (token != NULL) {
-        if (strcmp("exit", token) == 0)
-        {
-            exit(EXIT_SUCCESS);
-        }
+    while (NULL != token) {
+        if (0 == strcmp("exit", token)) exit(EXIT_SUCCESS);
         tokens[position] = token;
         position++;
+
         #ifdef DEBUG
         printf("\"");
         printf("%s", token);
         printf("\"\n");
         #endif
+
         token = strtok(NULL, TOK_DELIM);
     }
     tokens[position] = NULL;
     return tokens;
 }
 
-int executeCommand(char **args, EnvVars *envVars) {
+int execute_command(char **args, Env_vars *env_vars) {
 
     if(args[0] == NULL) {
-        return 1;
-    }
-
-    if(strcmp(args[0], "getpath") == 0) {
-        return getPath();
+        return;
+    } else if(strcmp(args[0], "getpath") == 0) {
+        printf("%s\n", getenv("PATH"));
     } else if(strcmp(args[0], "setpath") == 0) {
-
-        if(args[1] == NULL) {
-            printf("Error: Missing path argument\n");
-            return 1;
-        }
-        return setPath(args[1]);
-
+        set_path(args[1]);
     } else if(strcmp(args[0], "cd") == 0) {
-        changeDir(args[1], envVars);
-    } else if (strcmp(args[0], "!") == 0) {
-        execHistory(args, envVars);
+        change_dir(args[1], env_vars);
+    } else if (strcspn(args[0], "!") == 0) {
+        exec_history(args, env_vars);
     } else if(strcmp(args[0], "history") == 0) { 
-        printf("Executing history! \n");
-        if(count < 20) {
-         for(int i=0; i <= count-1; i++) {
-            printf("Command %d: %s",i+1,hist[i]);
-           }
-          } else { 
-               for(int i=0; i < 20; i++) {
-                   printf("Command %d: %s",i+1,hist[Hist_numb]);
-                   Hist_numb = (Hist_numb + 1) % 20;
-               }
-           }
-       // printf("Command 4: %s",hist[3]);
-    }
-    else {
-        return execExternal(args);
+        history();        
+    } else {
+        return exec_external(args);
     }   
 }
 
-int getPath() {
-    printf("%s\n", getenv("PATH"));
-    return 1;
+void set_path(char *args) {
+    if (args[1] == NULL) printf("Error: Missing path argument\n"); 
+    if (0 != setenv("PATH", args, 1)) perror("Shell");
 }
 
-int setPath(char *arg) {
-    setenv("PATH", arg, 1);
-    return 1;
-}
-
-void changeDir(char *arg, EnvVars *envVars) {
+void change_dir(char *arg, Env_vars *env_vars) {
     if(arg == NULL) {
-        chdir(getenv("HOME"));
-        envVars->cwd = getenv("HOME");
+        if (0 != chdir(getenv("HOME"))) {
+            perror("Shell");
+        } else {
+            env_vars->cwd = getenv("HOME");
+        }        
     } else {
 
-    if (chdir(arg)!= 0){
-        perror(arg);
-    }
-    envVars->cwd = getcwd(NULL, 0);
+        if (0 != chdir(arg)) {
+            perror(arg);
+        } else {
+            env_vars->cwd = getcwd(NULL, 0);
+        }
     }
 }
 
-int execExternal(char **args)
+void history() {
+    if(count < 20) {
+        for(int i=0; i <= count-1; i++) {
+            printf("Command %d: %s",i+1,hist[i]);
+        }
+    } else { 
+        for(int i=0; i < 20; i++) {
+            printf("Command %d: %s",i+1,hist[Hist_numb]);
+            Hist_numb = (Hist_numb + 1) % 20;
+        }
+    }
+}
+
+
+int exec_external(char **args)
 { 
     pid_t pid, wpid;
     int status;
     
     pid = fork();
-    if(pid == 0) {
-        if (execvp(args[0], args) == -1) {
+    if (pid == 0) {
+        // Child Process
+        if (-1 == execvp(args[0], args)) {
             perror("Shell");
         }
         exit(EXIT_FAILURE);
     } else if (pid < 0) {
+        // Error Forking
         perror("Shell");
     } else {
+        //Parent Process
         do {
             wpid = waitpid(pid, &status, WUNTRACED);
         } while (!WIFEXITED(status) && !WIFSIGNALED(status));
     }
-    return 1;
 } 
 
 //Tokenise Method breaking history.
-void execHistory(char **args, EnvVars *envVars) {
+void exec_history(char **args, Env_vars *env_vars) {
     //Holds the return from tokenise
    char  **temp;
    //Holds the value  of input from ! to compare when using array 
@@ -195,18 +183,18 @@ void execHistory(char **args, EnvVars *envVars) {
          if(Hist_numb == 0) { 
               strcpy(hist[19], hist[18]); 
          strcpy(TempValue[0], hist[19]); 
-        temp = tokeniseInput(TempValue[0]);
+        temp = tokenise_input(TempValue[0]);
          } else if(Hist_numb == 1) { 
               strcpy(hist[0], hist[19]); 
             strcpy(TempValue[0], hist[0]); 
-        temp = tokeniseInput(TempValue[0]);
+        temp = tokenise_input(TempValue[0]);
          } else {
          strcpy(hist[Hist_numb-1], hist[Hist_numb-2]); 
                   strcpy(TempValue[0], hist[Hist_numb-1]); 
-        temp = tokeniseInput(TempValue[0]);
+        temp = tokenise_input(TempValue[0]);
          }
 
-        executeCommand(temp, envVars);
+        execute_command(temp, env_vars);
         return;
            //This is for !-<no>
          } else if(args[0][1] == 45 ) {
@@ -230,8 +218,8 @@ void execHistory(char **args, EnvVars *envVars) {
              strcpy(hist[Hist_numb-1], hist[value]); 
              }
         strcpy(TempValue[0], hist[value]); 
-        temp = tokeniseInput(TempValue[0]);
-        executeCommand(temp, envVars);
+        temp = tokenise_input(TempValue[0]);
+        execute_command(temp, env_vars);
         return;
          } else {
            printf("You cannot select a value out of range of the history!\n");
@@ -270,8 +258,8 @@ void execHistory(char **args, EnvVars *envVars) {
          strcpy(hist[Hist_numb-1], hist[value]); 
              }
         strcpy(TempValue[0], hist[value]); 
-        temp = tokeniseInput(TempValue[0]);
-        executeCommand(temp, envVars);
+        temp = tokenise_input(TempValue[0]);
+        execute_command(temp, env_vars);
         return;
      } else {
          printf("You cannot select a value out of range of the history! \n");
