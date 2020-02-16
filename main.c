@@ -117,7 +117,7 @@ int executeCommand(char **args, EnvVars *envVars) {
     } else if(strcmp(args[0], "cd") == 0) {
         changeDir(args[1], envVars);
     } else if (strcmp(args[0], "!") == 0) {
-        execHistory(args);
+        execHistory(args, envVars);
     } else if(strcmp(args[0], "history") == 0) { 
         printf("Executing history! \n");
         if(count < 20) {
@@ -182,7 +182,7 @@ int execExternal(char **args)
 } 
 
 //Tokenise Method breaking history.
-void execHistory(char **args) {
+void execHistory(char **args, EnvVars *envVars) {
     //Holds the return from tokenise
    char  **temp;
    //Holds the value  of input from ! to compare when using array 
@@ -195,18 +195,18 @@ void execHistory(char **args) {
          if(Hist_numb == 0) { 
               strcpy(hist[19], hist[18]); 
          strcpy(TempValue[0], hist[19]); 
-        temp = tokenise(TempValue[0]);
+        temp = tokeniseInput(TempValue[0]);
          } else if(Hist_numb == 1) { 
               strcpy(hist[0], hist[19]); 
             strcpy(TempValue[0], hist[0]); 
-        temp = tokenise(TempValue[0]);
+        temp = tokeniseInput(TempValue[0]);
          } else {
          strcpy(hist[Hist_numb-1], hist[Hist_numb-2]); 
                   strcpy(TempValue[0], hist[Hist_numb-1]); 
-        temp = tokenise(TempValue[0]);
+        temp = tokeniseInput(TempValue[0]);
          }
 
-        commandHandler(temp);
+        executeCommand(temp, envVars);
         return;
            //This is for !-<no>
          } else if(args[0][1] == 45 ) {
@@ -230,8 +230,8 @@ void execHistory(char **args) {
              strcpy(hist[Hist_numb-1], hist[value]); 
              }
         strcpy(TempValue[0], hist[value]); 
-        temp = tokenise(TempValue[0]);
-        commandHandler(temp);
+        temp = tokeniseInput(TempValue[0]);
+        executeCommand(temp, envVars);
         return;
          } else {
            printf("You cannot select a value out of range of the history!\n");
@@ -270,8 +270,8 @@ void execHistory(char **args) {
          strcpy(hist[Hist_numb-1], hist[value]); 
              }
         strcpy(TempValue[0], hist[value]); 
-        temp = tokenise(TempValue[0]);
-        commandHandler(temp);
+        temp = tokeniseInput(TempValue[0]);
+        executeCommand(temp, envVars);
         return;
      } else {
          printf("You cannot select a value out of range of the history! \n");
@@ -296,5 +296,5 @@ void execHistory(char **args) {
            }
            return;
         }
-       }
+    }
   }  
