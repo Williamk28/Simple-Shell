@@ -131,8 +131,20 @@ int executeCommand(char **args, EnvVars *envVars) {
                }
            }
        // printf("Command 4: %s",hist[3]);
-    }
-    else {
+    } else if(strcmp(args[0], "writehistory") == 0) { 
+       if(write_history_tofile() == 0) {
+           printf("Writing to history to file, failed! \n");
+       } else { 
+            printf("Writing to history to file is sucessfull. \n"); 
+       }
+
+       } else if(strcmp(args[0], "loadhistory") == 0) {
+           if(LoadHistory() == 0) { 
+               printf("Error, File does not exist! \n");
+           } else {
+               printf("Sucess file has been loaded. \n");
+           }
+    } else {
         return execExternal(args);
     }   
 }
@@ -298,3 +310,59 @@ void execHistory(char **args, EnvVars *envVars) {
         }
     }
   }  
+
+  int write_history_tofile() {
+      FILE *fp;
+      fp = fopen(HistoryFile, "w"); 
+      if(fp != NULL) {
+          if(count < 20) {
+               for(int i=0; i < count; i++) {
+               fprintf(fp, "%s",hist[i]); 
+              }
+            fclose(fp);
+            return 1;
+              } else {
+              for(int i=0; i < 20; i++) {
+              fprintf(fp, "%s",hist[Hist_numb]); 
+              Hist_numb = (Hist_numb + 1) % 20;
+              }
+              fclose(fp); 
+              return 1;
+          }
+      } else {
+          printf("Error, Could not find file! \n");
+          return 0; 
+      }
+     fclose(fp);
+  }
+
+ int LoadHistory () {
+      FILE *fp;
+      char line[512];
+      Hist_numb = 0;
+      //char path = getcwd(NULL,0);
+
+      fp = fopen("HistoryFile.txt", "r");
+
+      if(fp == NULL) {
+          return 0;
+      }
+      
+      while(1) { 
+         if(fgets(line, 512, fp) == NULL) {
+         break;
+      }
+      //setting last char to a null terminator!
+        line[strlen(line)-1] = '\n';
+        AddHistory(line);
+  }
+         count = Hist_numb;
+         fclose(fp);
+         return 1;
+ }
+   
+    void AddHistory(char *line)  {
+        strcpy(hist[Hist_numb], line);
+        Hist_numb = (Hist_numb + 1) % 20;
+        return;
+    }
