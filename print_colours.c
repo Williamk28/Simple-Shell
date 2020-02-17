@@ -1,4 +1,4 @@
-#include "termColours.h"
+#include "print_colours_head.h"
 
 void red() {
     printf("\033[0;31m");
@@ -48,6 +48,6 @@ void bcyan() {
     printf("\033[1;36m");
 }
 
-void resetColor() {
+void reset_colour() {
     printf("\033[0m");
 }

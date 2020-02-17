@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include "termColours.h"
+#include "print_colours_head.h"
 #define MAX_COMMAND_LENGTH 512
 #define MAX_TOK_NO 50
 #define TOK_DELIM " \t|><&;\n"

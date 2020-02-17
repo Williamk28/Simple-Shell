@@ -23,7 +23,7 @@ void init_shell(Env_vars *env_vars) {
     if (0 != chdir(env_vars->cwd)) {
         bred();
         perror("Shell");
-        resetColor();
+        reset_colour();
     }
 
     #ifdef DEBUG
@@ -40,7 +40,7 @@ void loop_shell(Env_vars *env_vars) {
         printf("%s: ", env_vars->user);
         bblue();
         printf("%s> ", env_vars->cwd);
-        resetColor();
+        reset_colour();
         
         input = read_input();
         add_history(input);
@@ -58,7 +58,7 @@ char *read_input() {
     if (!str) {
         bred();
         fprintf(stderr, MEM_ALLOC_ERROR);
-        resetColor();
+        reset_colour();
         exit(EXIT_FAILURE);
     } else if (NULL == fgets(str, MAX_COMMAND_LENGTH, stdin)) {
         printf("\n");
@@ -82,7 +82,7 @@ char **tokenise_input(char *input) {
     if (!tokens) {
         bred();
         fprintf(stderr, MEM_ALLOC_ERROR);
-        resetColor();
+        reset_colour();
         exit(EXIT_FAILURE);
     }
 

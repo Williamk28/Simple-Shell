@@ -12,4 +12,4 @@ void magenta();
 void bmagenta();
 void cyan();
 void bcyan();
-void resetColor();
+void reset_colour();
