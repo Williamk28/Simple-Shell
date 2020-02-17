@@ -18,7 +18,7 @@ typedef struct Env_vars {
 typedef struct {
     char alias[MAX_COMMAND_LENGTH];
     char command[MAX_COMMAND_LENGTH];
-} Alias_Struct
+} Alias_Struct;
 
 void init_shell(Env_vars *env_vars);
 void loop_shell(Env_vars *env_vars);
