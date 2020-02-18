@@ -108,16 +108,18 @@ void execute_command(char **args, Env_vars *env_vars) {
 
     if(args[0] == NULL) {
         return;
-    } else if(strcmp(args[0], "getpath") == 0) {
+    } else if (strcmp(args[0], "getpath") == 0) {
         printf("%s\n", getenv("PATH"));
-    } else if(strcmp(args[0], "setpath") == 0) {
+    } else if (strcmp(args[0], "setpath") == 0) {
         set_path(args[1]);
-    } else if(strcmp(args[0], "cd") == 0) {
+    } else if (strcmp(args[0], "cd") == 0) {
         change_dir(args[1], env_vars);
     } else if (strcspn(args[0], "!") == 0) {
         exec_history(args, env_vars);
-    } else if(strcmp(args[0], "history") == 0) { 
+    } else if (strcmp(args[0], "history") == 0) { 
         history();        
+    } else if (strcmp(args[0], "alias") == 0){
+        addAlias(args);
     } else {
         exec_external(args);
     }   
@@ -181,20 +183,6 @@ int exec_external(char **args){
     }
 } 
 
-<<<<<<< HEAD
-void addAlias(char *arg){
-    //Checks if the alias is empty
-    if (arg != NULL){
-        for (int i = 0; i < NumOfAliases; i++){
-            //Checks if an alias with the same name exists
-            if (strcmp(arg[1],Alias_Struct[i].alias){
-                //Overrides the first command with the second 
-                Alias_Struct[i].command = arg[2];
-                printf("Alias has been replaced"); 
-            }
-        }
-}
-=======
 //Tokenise Method breaking history.
 void exec_history(char **args, Env_vars *env_vars) {
     //Holds the return from tokenise
@@ -312,4 +300,33 @@ void exec_history(char **args, Env_vars *env_vars) {
         }
     }
   }  
->>>>>>> 0eae07e7116050eef6d3f9556ba2ddf57efbf809
+
+  void addAlias(char **arg){
+    //Checks if the alias is empty
+    if (arg != NULL){
+        for (int i = 0; i < NumOfAliases; i++){
+            //Checks if an alias with the same name exists
+            if (strcmp(arg[1],Aliases[i].alias)){
+                //Overrides the first command with the second 
+                Aliases[i].command = arg[2];
+                printf("Alias has been replaced"); 
+            }
+        }
+        //Adds the alias unless it reached the limit
+        if (NumOfAliases < Alias_Size){
+            Aliases[NumOfAliases].alias = arg[1];
+            Aliases[NumOfAliases].command = arg[2];
+            NumOfAliases ++;
+            //TESTING
+            printf("Alias '%s' has been added \n", arg[1]);
+            printf("Number of Aliases %d\n", NumOfAliases);
+            for(int i = 0; i< NumOfAliases; i++){
+                printf("Contents of the Aliases Name: %s\n", Aliases[i].alias);
+                printf("Contents of the Aliases Command: %s\n", Aliases[i].command);
+            }
+        }
+        else{
+            printf("You have reached the limit of 10 aliases\n");
+        }
+    }    
+}

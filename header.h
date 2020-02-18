@@ -16,10 +16,9 @@ typedef struct Env_vars {
 } Env_vars;
 
 typedef struct {
-    char alias[MAX_COMMAND_LENGTH];
-    char command[MAX_COMMAND_LENGTH];
-} Alias_Struct[10];
-//Up to 10 Aliases
+    char *alias;
+    char *command;
+} Alias_Struct;
 
 void init_shell(Env_vars *env_vars);
 void loop_shell(Env_vars *env_vars);
@@ -33,8 +32,11 @@ void change_dir(char* path, Env_vars *env_vars);
 void history();
 int exec_external(char **args);
 void exec_history(char **args, Env_vars *env_vars);
+void addAlias(char **arg);
 //Defining history structure
    int Hist_numb;
    char hist[20][512];
 
 int NumOfAliases = 0;
+Alias_Struct Aliases[10];
+int Alias_Size = 10;
