@@ -135,14 +135,14 @@ int executeCommand(char **args, EnvVars *envVars) {
        if(write_history_tofile() == 0) {
            printf("Writing to history to file, failed! \n");
        } else { 
-            printf("Writing to history to file is sucessfull. \n"); 
+            printf("Writing to history to file is successfull. \n"); 
        }
 
        } else if(strcmp(args[0], "loadhistory") == 0) {
            if(LoadHistory() == 0) { 
                printf("Error, File does not exist! \n");
            } else {
-               printf("Sucess file has been loaded. \n");
+               printf("Success file has been loaded. \n");
            }
     } else {
         return execExternal(args);
@@ -197,24 +197,31 @@ int execExternal(char **args)
 void execHistory(char **args, EnvVars *envVars) {
     //Holds the return from tokenise
    char  **temp;
+   char  **temp2;
    //Holds the value  of input from ! to compare when using array 
     int value;
     //Creates a copy to allows to trash the array without effecting main array
     char TempValue[1][512];
    //This is for !!
      if(strcmp(args[0], "!!") == 0){
+         if(Hist_numb == 1 && count == 1) {
+             printf("There is no previous command to call! \n");
+             Hist_numb--;
+             count--;
+             return;
+         }
          printf("Executing last command\n");
-         if(Hist_numb == 0) { 
-              strcpy(hist[19], hist[18]); 
+         if(Hist_numb == 0 && count >= 20) { 
+         strcpy(hist[19], hist[18]); 
          strcpy(TempValue[0], hist[19]); 
         temp = tokeniseInput(TempValue[0]);
-         } else if(Hist_numb == 1) { 
+         } else if(Hist_numb == 1 && count >= 20) { 
               strcpy(hist[0], hist[19]); 
             strcpy(TempValue[0], hist[0]); 
         temp = tokeniseInput(TempValue[0]);
          } else {
          strcpy(hist[Hist_numb-1], hist[Hist_numb-2]); 
-                  strcpy(TempValue[0], hist[Hist_numb-1]); 
+         strcpy(TempValue[0], hist[Hist_numb-1]); 
         temp = tokeniseInput(TempValue[0]);
          }
 
@@ -313,16 +320,19 @@ void execHistory(char **args, EnvVars *envVars) {
 
   int write_history_tofile() {
       FILE *fp;
+
+
       fp = fopen(HistoryFile, "w"); 
+
       if(fp != NULL) {
           if(count < 20) {
-               for(int i=0; i < count; i++) {
+               for(int i=0; i < count-1; i++) {
                fprintf(fp, "%s",hist[i]); 
               }
             fclose(fp);
             return 1;
               } else {
-              for(int i=0; i < 20; i++) {
+              for(int i=0; i < 19; i++) {
               fprintf(fp, "%s",hist[Hist_numb]); 
               Hist_numb = (Hist_numb + 1) % 20;
               }
@@ -340,9 +350,9 @@ void execHistory(char **args, EnvVars *envVars) {
       FILE *fp;
       char line[512];
       Hist_numb = 0;
-      //char path = getcwd(NULL,0);
+      count = 0;
 
-      fp = fopen("HistoryFile.txt", "r");
+      fp = fopen(HistoryFile, "r");
 
       if(fp == NULL) {
           return 0;
@@ -352,11 +362,10 @@ void execHistory(char **args, EnvVars *envVars) {
          if(fgets(line, 512, fp) == NULL) {
          break;
       }
-      //setting last char to a null terminator!
+      //setting last char to a new line!
         line[strlen(line)-1] = '\n';
         AddHistory(line);
   }
-         count = Hist_numb;
          fclose(fp);
          return 1;
  }
@@ -364,5 +373,6 @@ void execHistory(char **args, EnvVars *envVars) {
     void AddHistory(char *line)  {
         strcpy(hist[Hist_numb], line);
         Hist_numb = (Hist_numb + 1) % 20;
+        count ++;
         return;
     }
