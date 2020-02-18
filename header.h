@@ -16,7 +16,8 @@ typedef struct {
 typedef struct {
     char alias[MAX_COMMAND_LENGTH];
     char command[MAX_COMMAND_LENGTH];
-} Alias_Struct
+} Alias_Struct[10];
+//Up to 10 Aliases
 
 void initShell(EnvVars *envVars);
 void loopShell(EnvVars *envVars);
