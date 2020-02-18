@@ -443,3 +443,15 @@ void exec_history(char **args, Env_vars *env_vars) {
         count ++;
         return;
     }
+void addAlias(char *arg){
+    //Checks if the alias is empty
+    if (arg != NULL){
+        for (int i = 0; i < NumOfAliases; i++){
+            //Checks if an alias with the same name exists
+            if (strcmp(arg[1],Alias_Struct[i].alias){
+                //Overrides the first command with the second 
+                Alias_Struct[i].command = arg[2];
+                printf("Alias has been replaced"); 
+            }
+        }
+}
