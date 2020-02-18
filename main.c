@@ -212,16 +212,35 @@ void execHistory(char **args, EnvVars *envVars) {
          }
          printf("Executing last command\n");
          if(Hist_numb == 0 && count >= 20) { 
+           if(strcmp(hist[18],"history\n") == 0){
+             Hist_numb = 19;
+             count--;
+            strcpy(TempValue[0], hist[18]);
+             temp = tokeniseInput(TempValue[0]);
+            executeCommand(temp, envVars);
+            return;
+         }
          strcpy(hist[19], hist[18]); 
          strcpy(TempValue[0], hist[19]); 
         temp = tokeniseInput(TempValue[0]);
          } else if(Hist_numb == 1 && count >= 20) { 
-              strcpy(hist[0], hist[19]); 
+              if(strcmp(hist[19],"history\n") == 0){ 
+                  Hist_numb = 0;
+                  count--;
+                  strcpy(TempValue[0], hist[19]);
+                  temp = tokeniseInput(TempValue[0]);
+                  executeCommand(temp, envVars);
+              }
+            strcpy(hist[0], hist[19]); 
             strcpy(TempValue[0], hist[0]); 
-        temp = tokeniseInput(TempValue[0]);
+            temp = tokeniseInput(TempValue[0]);
          } else {
          strcpy(hist[Hist_numb-1], hist[Hist_numb-2]); 
-         strcpy(TempValue[0], hist[Hist_numb-1]); 
+         strcpy(TempValue[0], hist[Hist_numb-1]);
+         if(strcmp(TempValue[0],"history\n") == 0){
+             Hist_numb--;
+             count--;
+         }
         temp = tokeniseInput(TempValue[0]);
          }
 
@@ -244,9 +263,25 @@ void execHistory(char **args, EnvVars *envVars) {
              } 
          if(value <= count-1 && value >= 0 && value < 20) { 
               if(Hist_numb == 0) { 
+              if(strcmp(hist[value],"history\n") == 0){
+             Hist_numb = 19;
+             count--;
+            strcpy(TempValue[0], hist[value]);
+             temp = tokeniseInput(TempValue[0]);
+            executeCommand(temp, envVars);
+            return;
+          }
              strcpy(hist[19], hist[value]);
-             } else { 
-             strcpy(hist[Hist_numb-1], hist[value]); 
+                 } else {
+           if(strcmp(hist[value],"history\n") == 0){
+             Hist_numb--;
+             count--;
+            strcpy(TempValue[0], hist[value]);
+             temp = tokeniseInput(TempValue[0]);
+            executeCommand(temp, envVars);
+            return;
+           }
+         strcpy(hist[Hist_numb-1], hist[value]); 
              }
         strcpy(TempValue[0], hist[value]); 
         temp = tokeniseInput(TempValue[0]);
@@ -274,18 +309,38 @@ void execHistory(char **args, EnvVars *envVars) {
            }
            return;
        }
-     
-        //This is for if just !<no>
-     }  else if(args[0][1] >= 48 && args[0][1] <= 57) {
+          }  else if(args[0][1] >= 48 && args[0][1] <= 57) {
          if(args[0][2] == 0) {
            value = (args[0][1])-49;
          } else {
              value = (((args[0][1]-48)*10) + args[0][2])-49;
          }
-         if(value < count-1 && value >= 0 && value <= 20) { 
+         if(value < count-1 && value >= 0 && value <= 20) {
+             if(count > 20) {
+            value = value + Hist_numb;
+             }
+            if(value > 20) {
+                value = value - 21;
+            }
              if(Hist_numb == 0) { 
+             if(strcmp(hist[value],"history\n") == 0){
+             Hist_numb = 19;
+             count--;
+            strcpy(TempValue[0], hist[value]);
+             temp = tokeniseInput(TempValue[0]);
+            executeCommand(temp, envVars);
+            return;
+          }
              strcpy(hist[19], hist[value]);
              } else {
+           if(strcmp(hist[value],"history\n") == 0){
+             Hist_numb--;
+             count--;
+            strcpy(TempValue[0], hist[value]);
+             temp = tokeniseInput(TempValue[0]);
+            executeCommand(temp, envVars);
+            return;
+           }
          strcpy(hist[Hist_numb-1], hist[value]); 
              }
         strcpy(TempValue[0], hist[value]); 
