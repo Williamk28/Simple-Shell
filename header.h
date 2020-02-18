@@ -2,13 +2,15 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <sys/wait.h>
+#include <sys/wait.h> 
+#include <sys/stat.h>
 #include "print_colours_head.h"
 #define MAX_COMMAND_LENGTH 512
 #define MAX_TOK_NO 50
 #define TOK_DELIM " \t|><&;\n"
 #define MEM_ALLOC_ERROR "Error: Memory unable to be allocated\n"
 #define DEBUG
+#define HistoryFile "./HistoryFile.txt"
 
 typedef struct Env_vars {
     char *cwd;
@@ -27,6 +29,9 @@ void change_dir(char* path, Env_vars *env_vars);
 void history();
 int exec_external(char **args);
 void exec_history(char **args, Env_vars *env_vars);
+int write_history_tofile();
+int LoadHistory();
+void AddHistory(char *line);
 //Defining history structure
    int Hist_numb;
    char hist[20][512];
