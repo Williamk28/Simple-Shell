@@ -37,6 +37,7 @@ void addAlias(char **arg);
 int write_history_tofile();
 int LoadHistory();
 void AddHistory(char *line);
+void printAliases();
 //Defining history structure
    int Hist_numb;
    char hist[20][512];
