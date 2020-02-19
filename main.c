@@ -105,6 +105,7 @@ char **tokenise_input(char *input) {
 }
 
 void execute_command(char **args, Env_vars *env_vars) {
+    int i = 0;
 
     if(args[0] == NULL) {
         return;
@@ -122,7 +123,7 @@ void execute_command(char **args, Env_vars *env_vars) {
         addAlias(args);
     } else {
         exec_external(args);
-    }   
+    } 
 }
 
 void set_path(char *arg) {
@@ -302,25 +303,35 @@ void exec_history(char **args, Env_vars *env_vars) {
   }  
 
   void addAlias(char **arg){
+    Alias_Struct Aliases [10];
+    char aliasCommand[MAX_COMMAND_LENGTH];
     //Checks if the alias is empty
-    if (arg != NULL){
+    if (arg != NULL && arg[2] != NULL){
+        //Concatenates the rest of the commnad line as one command leaving no whitespace
+        int c = 3;
+        strcpy(aliasCommand, arg[2]);
+        while (arg[c] != NULL){
+            strcat(aliasCommand, " ");
+            strcat(aliasCommand, arg[3]);
+            c++;
+        }
+        //Checks if an alias with the same name exists
         for (int i = 0; i < NumOfAliases; i++){
-            //Checks if an alias with the same name exists
             if (strcmp(arg[1],Aliases[i].alias)){
                 //Overrides the first command with the second 
-                Aliases[i].command = arg[2];
+                Aliases[i].command = aliasCommand;
                 printf("Alias has been replaced"); 
             }
         }
         //Adds the alias unless it reached the limit
         if (NumOfAliases < Alias_Size){
             Aliases[NumOfAliases].alias = arg[1];
-            Aliases[NumOfAliases].command = arg[2];
+            Aliases[NumOfAliases].command = aliasCommand;
             NumOfAliases ++;
             //TESTING
             printf("Alias '%s' has been added \n", arg[1]);
             printf("Number of Aliases %d\n", NumOfAliases);
-            for(int i = 0; i< NumOfAliases; i++){
+            for(int i = 0; i < NumOfAliases; i++){
                 printf("Contents of the Aliases Name: %s\n", Aliases[i].alias);
                 printf("Contents of the Aliases Command: %s\n", Aliases[i].command);
             }
