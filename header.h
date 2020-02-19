@@ -33,6 +33,7 @@ void history();
 int exec_external(char **args);
 void exec_history(char **args, Env_vars *env_vars);
 void addAlias(char **arg);
+void printAliases();
 //Defining history structure
    int Hist_numb;
    char hist[20][512];
