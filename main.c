@@ -307,9 +307,9 @@ void exec_history(char **args, Env_vars *env_vars) {
   void addAlias(char **arg){
     Alias_Struct Aliases [10];
     char aliasCommand[MAX_COMMAND_LENGTH];
-    //Checks if the alias is empty
+    //Checks if the alias command is not empty
     if (arg[2] != NULL){
-        //Concatenates the rest of the commnad line as one command leaving no whitespace
+        //Concatenates the rest of the commnad line as one command after the 3rd argument
         int c = 3;
         strcpy(aliasCommand, arg[2]);
         while (arg[c] != NULL){
@@ -326,7 +326,7 @@ void exec_history(char **args, Env_vars *env_vars) {
             }
         }
         //Adds the alias unless it reached the limit
-        if (NumOfAliases < Alias_Size){
+        if (NumOfAliases < 10){
             Aliases[NumOfAliases].alias = arg[1];
             Aliases[NumOfAliases].command = aliasCommand;
             NumOfAliases++;
@@ -339,10 +339,9 @@ void exec_history(char **args, Env_vars *env_vars) {
     }    
 }
 
-//This prints the list of Aliases
 void printAliases(){
     if (NumOfAliases == 0){
-        printf("There are currently no Aliases set");
+        printf("There are currently no Aliases set\n");
     }
     else{
         for(int i = 0; i < NumOfAliases; i++){
