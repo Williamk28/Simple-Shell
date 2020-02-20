@@ -12,15 +12,16 @@
 #define DEBUG
 #define HistoryFile "./HistoryFile.txt"
 
+typedef struct Alias {
+    char alias_name[20];
+    char alias_command[MAX_COMMAND_LENGTH];
+} Alias;
+
 typedef struct Env_vars {
     char *cwd;
     char *user;
+    Alias aliases[10];
 } Env_vars;
-
-typedef struct {
-    char alias[MAX_COMMAND_LENGTH];
-    char command[MAX_COMMAND_LENGTH];
-} Alias_Struct;
 
 void init_shell(Env_vars *env_vars);
 void loop_shell(Env_vars *env_vars);
@@ -33,14 +34,12 @@ void change_dir(char* path, Env_vars *env_vars);
 void history();
 int exec_external(char **args);
 void exec_history(char **args, Env_vars *env_vars);
-void addAlias(char **arg);
 int write_history_tofile();
 int LoadHistory();
 void AddHistory(char *line);
-void printAliases();
+void addAlias(char **arg, Env_vars *env_vars);
+void printAliases(Env_vars *env_vars);
+int arrlen(char *s[],int len);
 //Defining history structure
    int Hist_numb;
    char hist[20][512];
-
-int NumOfAliases = 0;
-Alias_Struct Aliases[10];

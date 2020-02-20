@@ -2,6 +2,7 @@
 
 int Hist_numb = 0;
 int count = 0;
+int NumOfAliases = 0;
 
 int main() {
     
@@ -105,8 +106,6 @@ char **tokenise_input(char *input) {
 }
 
 void execute_command(char **args, Env_vars *env_vars) {
-    int i = 0;
-
     if(args[0] == NULL) {
         return;
     } else if (strcmp(args[0], "getpath") == 0) {
@@ -133,9 +132,9 @@ void execute_command(char **args, Env_vars *env_vars) {
     } else if (strcmp(args[0], "history") == 0) { 
         history();        
     } else if (strcmp(args[0], "alias") == 0){
-        addAlias(args);
+        addAlias(args, env_vars);
     } else if (strcmp(args[0], "print") == 0){
-        printAliases();
+        printAliases(env_vars);
     }else {
         exec_external(args);
     } 
@@ -437,32 +436,30 @@ void exec_history(char **args, Env_vars *env_vars) {
         count ++;
         return;
     }
-  void addAlias(char **arg){
-    char aliasCommand[MAX_COMMAND_LENGTH];
-    char aliasName[MAX_COMMAND_LENGTH];
-    int counter = 3;
+  void addAlias(char **arg, Env_vars *env_vars){
+    int i = 2;
+    char aliasCommand[MAX_COMMAND_LENGTH] = "";
     //Checks if the alias command is not empty
     if (arg[2] != NULL){
         //Concatenates the rest of the commnad line as one command after the 3rd argument
-        strcpy(aliasName, arg[1]);
-        strcpy(aliasCommand, arg[2]);
-        while (arg[counter] != NULL){
+        while (arg[i] != NULL){
+            strcat(aliasCommand, arg[i]);
             strcat(aliasCommand, " ");
-            strcat(aliasCommand, arg[3]);
-            counter++;
+            i++;
         }
         //Checks if an alias with the same name exists
-        for (int i = 0; i < NumOfAliases; i++){
-            if (strcmp(arg[1],Aliases[i].alias)){
+        for (int i = 0; i < NumOfAliases; i++) {
+            
+            if (strcmp(arg[1], env_vars->aliases[i].alias_name) == 0){
                 //Overrides the first command with the second 
-                Aliases[i].command = aliasCommand;
+                strcpy(env_vars->aliases[i].alias_command, aliasCommand);
                 printf("Alias has been replaced\n"); 
             }
         }
         //Adds the alias unless it reached the limit
         if (NumOfAliases < 10){
-            Aliases[NumOfAliases].alias = aliasName;
-            Aliases[NumOfAliases].command = aliasCommand;
+            strcpy(env_vars->aliases[NumOfAliases].alias_name, arg[1]);
+            strcpy(env_vars->aliases[NumOfAliases].alias_command, aliasCommand);
             NumOfAliases++;
             printf("Alias '%s' has been added \n", arg[1]);
             printf("Number of Aliases %d\n", NumOfAliases);
@@ -470,16 +467,17 @@ void exec_history(char **args, Env_vars *env_vars) {
         else{
             printf("You have reached the limit of 10 aliases\n");
         }
-    }    
-}
+    }
+  }    
 
-void printAliases(){
+
+void printAliases(Env_vars *env_vars) {
     if (NumOfAliases == 0){
         printf("There are currently no Aliases set\n");
     }
     else{
         for(int i = 0; i < NumOfAliases; i++){
-            printf("Alias Name: %s Alias Command: %s\n", Aliases[i].alias, Aliases[i].command);
+            printf("alias %s='%s'\n", env_vars->aliases[i].alias_name, env_vars->aliases[i].alias_command);
         } 
     }
 }
