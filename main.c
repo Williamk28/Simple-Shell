@@ -305,29 +305,30 @@ void exec_history(char **args, Env_vars *env_vars) {
   }  
 
   void addAlias(char **arg){
-    //Alias_Struct Aliases [10];
     char aliasCommand[MAX_COMMAND_LENGTH];
+    char aliasName[MAX_COMMAND_LENGTH];
+    int counter = 3;
     //Checks if the alias command is not empty
     if (arg[2] != NULL){
         //Concatenates the rest of the commnad line as one command after the 3rd argument
-        int c = 3;
+        strcpy(aliasName, arg[1]);
         strcpy(aliasCommand, arg[2]);
-        while (arg[c] != NULL){
+        while (arg[counter] != NULL){
             strcat(aliasCommand, " ");
             strcat(aliasCommand, arg[3]);
-            c++;
+            counter++;
         }
         //Checks if an alias with the same name exists
         for (int i = 0; i < NumOfAliases; i++){
             if (strcmp(arg[1],Aliases[i].alias)){
                 //Overrides the first command with the second 
                 Aliases[i].command = aliasCommand;
-                printf("Alias has been replaced"); 
+                printf("Alias has been replaced\n"); 
             }
         }
         //Adds the alias unless it reached the limit
         if (NumOfAliases < 10){
-            Aliases[NumOfAliases].alias = arg[1];
+            Aliases[NumOfAliases].alias = aliasName;
             Aliases[NumOfAliases].command = aliasCommand;
             NumOfAliases++;
             printf("Alias '%s' has been added \n", arg[1]);
