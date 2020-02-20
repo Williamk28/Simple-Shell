@@ -44,4 +44,3 @@ void printAliases();
 
 int NumOfAliases = 0;
 Alias_Struct Aliases[10];
-int Alias_Size = 10;
