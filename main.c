@@ -305,7 +305,7 @@ void exec_history(char **args, Env_vars *env_vars) {
   }  
 
   void addAlias(char **arg){
-    Alias_Struct Aliases [10];
+    //Alias_Struct Aliases [10];
     char aliasCommand[MAX_COMMAND_LENGTH];
     //Checks if the alias command is not empty
     if (arg[2] != NULL){
