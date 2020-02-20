@@ -298,3 +298,39 @@ void exec_history(char **args, Env_vars *env_vars) {
         }
     }
   }  
+
+void removeAlias(char *arg) {
+        if (NumOfAliases == NULL) {
+            printf("There are no aliases.");
+            // ^^Checking if there are any existing aliases^^
+        }
+        else if (arg != NULL) {
+            for (int i = 0; i < NumOfAliases; i++) {
+                if (strcmp(arg[1], Aliases[i].alias)) {
+                    // ^^Checking if the alias exists^^
+                    Aliases[i].command = NULL;
+                    NumOfAliases = NumOfAliases - 1;
+                    // ^^Deleting the alias^^
+                    for (int j = Aliases[i + 1]; j < Aliases; j++) {
+                    Aliases[j - 1] = Aliases[j];
+                    // ^^ Moving all elements after NULL gap to the left by one^^
+                    }
+                }
+            }
+        } else {
+            printf("This alias doesn't exist.")
+            // ^^If the argument doesn't match any existing alias^^
+        }
+    }
+
+    void printAliases() { 
+        if (NumOfAliases == NULL) {
+            printf("There are no aliases.")
+            // ^^Checking if there are any existing aliases^^
+        }
+        else {
+            printf("There are %d aliases: \n", NumOfAliases)
+            printf("%s \n", Aliases[10])
+            // ^^Printing out the list of aliases^^
+        }
+    }
