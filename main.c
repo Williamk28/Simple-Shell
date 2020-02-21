@@ -46,7 +46,7 @@ void loop_shell(Env_vars *env_vars) {
         input = read_input();
         add_history(input);
         args = tokenise_input(input);
-        execute_alias(args, env_vars);
+        if (args[0] != NULL) execute_alias(args, env_vars);
 
         free(input);
         free(args);
@@ -106,9 +106,7 @@ char **tokenise_input(char *input) {
 }
 
 void execute_command(char **args, Env_vars *env_vars) {
-    if(args[0] == NULL) {
-        return;
-    } else if (strcmp(args[0], "getpath") == 0) {
+    if (strcmp(args[0], "getpath") == 0) {
         printf("%s\n", getenv("PATH"));
     } else if (strcmp(args[0], "setpath") == 0) {
         set_path(args[1]);
