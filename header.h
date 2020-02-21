@@ -17,11 +17,6 @@ typedef struct Alias {
     char alias_command[MAX_COMMAND_LENGTH];
 } Alias;
 
-typedef struct Alias {
-    char alias_name[20];
-    char alias_command[MAX_COMMAND_LENGTH];
-} Alias;
-
 typedef struct Env_vars {
     char *cwd;
     char *user;
