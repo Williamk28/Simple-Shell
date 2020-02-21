@@ -132,9 +132,12 @@ void execute_command(char **args, Env_vars *env_vars) {
     } else if (strcmp(args[0], "history") == 0) { 
         history();        
     } else if (strcmp(args[0], "alias") == 0){
-        addAlias(args, env_vars);
-    } else if (strcmp(args[0], "print") == 0){
-        printAliases(env_vars);
+        if (args[1] != NULL){
+            addAlias(args, env_vars);
+        }
+        else{
+            printAliases(env_vars);
+        }
     }else {
         exec_external(args);
     } 
@@ -450,7 +453,6 @@ void exec_history(char **args, Env_vars *env_vars) {
         }
         //Checks if an alias with the same name exists
         for (int i = 0; i < NumOfAliases; i++) {
-            
             if (strcmp(arg[1], env_vars->aliases[i].alias_name) == 0){
                 //Overrides the first command with the second 
                 strcpy(env_vars->aliases[i].alias_command, aliasCommand);
@@ -472,6 +474,9 @@ void exec_history(char **args, Env_vars *env_vars) {
         else{
             printf("You have reached the limit of 10 aliases\n");
         }
+    }
+    else{
+        printf("WE NEED MORE ARUMENTS!!!\n");
     }
   }    
 
