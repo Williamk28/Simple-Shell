@@ -40,6 +40,7 @@ void AddHistory(char *line);
 void addAlias(char **arg, Env_vars *env_vars);
 void printAliases(Env_vars *env_vars);
 void execute_alias(char **arg, Env_vars *env_vars);
+void removeAlias(char **arg, Env_vars *env_vars);
 //Defining history structure
    int Hist_numb;
    char hist[20][512];
