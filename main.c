@@ -508,6 +508,7 @@ void removeAlias(char **arg, Env_vars *env_vars) {
                     // Deleting the alias.
                     printf ("Alias '%s' has been deleted. \n", env_vars->aliases[i].alias_name);
                     strcpy (env_vars->aliases[i].alias_command, "");
+                    strcpy (env_vars->aliases[i].alias_name, "");
                     NumOfAliases = NumOfAliases - 1;
                     /*  // Moving all elements after NULL gap to the left by one.
                     for (int j = i + 1; j < NumOfAliases; j++) {
