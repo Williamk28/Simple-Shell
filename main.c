@@ -509,17 +509,17 @@ void removeAlias(char **arg, Env_vars *env_vars) {
                     printf ("Alias '%s' has been deleted. \n", env_vars->aliases[i].alias_name);
                     strcpy (env_vars->aliases[i].alias_command, "");
                     NumOfAliases = NumOfAliases - 1;
-                    /*  Moving all elements after NULL gap to the left by one.
+                    /*  // Moving all elements after NULL gap to the left by one.
                     for (int j = i + 1; j < NumOfAliases; j++) {
                         env_vars->aliases[j - 1] = env_vars->aliases[j]; */
-                    }
                 }
             }
-            else {
-                // If the argument doesn't match any existing alias.
-                printf("This alias doesn't exist.");
-                }
-            }       
+        }
+        else {
+            // If the argument doesn't match any existing alias.
+            printf("This alias doesn't exist.");
+            }
+        }       
 
 
 //Executes the alias command if theres an alias otherwise execute the command
