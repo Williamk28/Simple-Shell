@@ -23,7 +23,6 @@ char *read_input();
 void add_history(char *input);
 char **tokenise_input(char *input);
 void execute_command(char **args, Env_vars *env_vars);
-int getPath();
 void set_path(char* str);
 void change_dir(char* path, Env_vars *env_vars);
 void history();
