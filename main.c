@@ -148,8 +148,8 @@ void execute_command(char **args, Env_vars *env_vars) {
 }
 
 void set_path(char *arg) {
-    if (NULL == arg) printf("Error: Missing path argument\n"); 
-    if (0 != setenv("PATH", arg, 1)) perror("Shell");
+    if (NULL == arg) printf("Error: Missing path argument\n") ;
+    else if (0 != setenv("PATH", arg, 1)) perror("Shell");
 }
 
 void change_dir(char *arg, Env_vars *env_vars) {
