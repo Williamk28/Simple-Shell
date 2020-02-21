@@ -125,7 +125,10 @@ void execute_command(char **args, Env_vars *env_vars) {
         else{
             printAliases(env_vars);
         }
-    }else {
+    } else if (strcmp(args[0], "unalias") == 0) {
+        removeAlias(args, env_vars);
+    }
+    else {
         exec_external(args);
     } 
 }
@@ -361,20 +364,20 @@ void printAliases(Env_vars *env_vars) {
 
 
 void removeAlias(char **arg, Env_vars *env_vars) {
-        if (NumOfAliases == NULL) {
+        if (NumOfAliases == 0) {
             printf("There are no aliases.");
             // ^^Checking if there are any existing aliases^^
         }
         else if (arg != NULL) {
             for (int i = 0; i < NumOfAliases; i++) {
-                if (strcmp(arg[1], Aliases[i].alias)) {
+                if (strcmp(arg[1], env_vars->aliases[i].alias_name)) {
                     // ^^Checking if the alias exists^^
-                    Aliases[i].command = NULL;
+                    strcpy(env_vars->aliases[i].alias_command, "");
                     NumOfAliases = NumOfAliases - 1;
                     // ^^Deleting the alias^^
                     for (int j = i + 1; j < NumOfAliases; j++) {
-                    Aliases[j - 1] = Aliases[j];
-                    // ^^ Moving all elements after NULL gap to the left by one^^
+                        env_vars->aliases[j - 1] = env_vars->aliases[j];
+                        // ^^ Moving all elements after NULL gap to the left by one^^
                     }
                 }
             }
@@ -383,6 +386,7 @@ void removeAlias(char **arg, Env_vars *env_vars) {
             // ^^If the argument doesn't match any existing alias^^
         }
     }
+
 void execute_alias(char **arg, Env_vars *env_vars){
     int alias = 0;
     for (int i = 0; i < 10; i++) {
