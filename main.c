@@ -46,7 +46,7 @@ void loop_shell(Env_vars *env_vars) {
         input = read_input();
         add_history(input);
         args = tokenise_input(input);
-        execute_command(args, env_vars);
+        execute_alias(args, env_vars);
 
         free(input);
         free(args);
@@ -467,7 +467,7 @@ void exec_history(char **args, Env_vars *env_vars) {
             printf("Number of Aliases %d\n", NumOfAliases);
         }
         else if (replace == 1){
-            replace = 0;
+            //Do nothing
         }
         else{
             printf("You have reached the limit of 10 aliases\n");
@@ -509,3 +509,17 @@ void removeAlias(char *arg) {
             // ^^If the argument doesn't match any existing alias^^
         }
     }
+
+void execute_alias(char **arg, Env_vars *env_vars){
+    int alias = 0;
+    for (int i = 0; i < 10; i++) {
+        if (strcmp(arg[0], env_vars->aliases[i].alias_name) == 0){
+            char **command = tokenise_input(env_vars->aliases[i].alias_command);
+            execute_command(command, env_vars);
+            alias = 1;
+        }  
+    }
+    if (alias == 0){
+        execute_command(arg, env_vars);
+    }
+}
