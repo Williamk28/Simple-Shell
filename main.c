@@ -352,7 +352,7 @@ void printAliases(){
 }
 
 
-void removeAlias(char *arg) {
+void removeAlias(char **arg) {
         if (NumOfAliases == NULL) {
             printf("There are no aliases.");
             // ^^Checking if there are any existing aliases^^
@@ -364,14 +364,14 @@ void removeAlias(char *arg) {
                     Aliases[i].command = NULL;
                     NumOfAliases = NumOfAliases - 1;
                     // ^^Deleting the alias^^
-                    for (int j = Aliases[i + 1]; j < Aliases; j++) {
+                    for (int j = i + 1; j < NumOfAliases; j++) {
                     Aliases[j - 1] = Aliases[j];
                     // ^^ Moving all elements after NULL gap to the left by one^^
                     }
                 }
             }
         } else {
-            printf("This alias doesn't exist.")
+            printf("This alias doesn't exist.");
             // ^^If the argument doesn't match any existing alias^^
         }
     }
