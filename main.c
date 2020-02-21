@@ -515,11 +515,12 @@ void removeAlias(char **arg, Env_vars *env_vars) {
                     }
                 }
             }
-        } else {
-            // If the argument doesn't match any existing alias.
-            printf("This alias doesn't exist.");
-        }
-    }
+            else {
+                // If the argument doesn't match any existing alias.
+                printf("This alias doesn't exist.");
+                }
+            }       
+
 
 //Executes the alias command if theres an alias otherwise execute the command
 void execute_alias(char **arg, Env_vars *env_vars){
