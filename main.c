@@ -443,21 +443,25 @@ void exec_history(char **args, Env_vars *env_vars) {
         return;
     }
   void addAlias(char **arg, Env_vars *env_vars){
-    int i = 2;
+    int i = 3;
     int replace = 0;
     char aliasCommand[MAX_COMMAND_LENGTH] = "";
     //Checks if the alias command is not empty
-    if (arg[2] != NULL){
+    if (arg[2] == NULL){
+        printf("Not enough Parameters\n");
+    }
+    else {
         //Concatenates the rest of the commnad line as one command after the 3rd argument
+        strcpy(aliasCommand, arg[2]);
         while (arg[i] != NULL){
-            strcat(aliasCommand, arg[i]);
             strcat(aliasCommand, " ");
+            strcat(aliasCommand, arg[i]);
             i++;
         }
         //Checks if an alias with the same name exists
         for (int i = 0; i < NumOfAliases; i++) {
             if (strcmp(arg[1], env_vars->aliases[i].alias_name) == 0){
-                //Overrides the first command with the second 
+                //Replace the first command with the second 
                 strcpy(env_vars->aliases[i].alias_command, aliasCommand);
                 printf("Alias has been replaced\n"); 
                 replace = 1;
@@ -471,6 +475,7 @@ void exec_history(char **args, Env_vars *env_vars) {
             printf("Alias '%s' has been added \n", arg[1]);
             printf("Number of Aliases %d\n", NumOfAliases);
         }
+        //If alias has been replaced then do nothing
         else if (replace == 1){
             //Do nothing
         }
@@ -478,12 +483,9 @@ void exec_history(char **args, Env_vars *env_vars) {
             printf("You have reached the limit of 10 aliases\n");
         }
     }
-    else{
-        printf("WE NEED MORE ARUMENTS!!!\n");
-    }
   }    
 
-
+//Prints the ALias arrays
 void printAliases(Env_vars *env_vars) {
     if (NumOfAliases == 0){
         printf("There are currently no Aliases set\n");
@@ -520,6 +522,7 @@ void removeAlias(char **arg, Env_vars *env_vars) {
         }
     }
 
+//Executes the alias command if theres an alias otherwise execute the command
 void execute_alias(char **arg, Env_vars *env_vars){
     int alias = 0;
     for (int i = 0; i < 10; i++) {
