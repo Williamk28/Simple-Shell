@@ -4,20 +4,17 @@ int Hist_numb = 0;
 int count = 0;
 int NumOfAliases = 0;
 
-int main() {
+void main() {
     
     Env_vars env_vars;
 
     init_shell(&env_vars);
 
     loop_shell(&env_vars);
-
-    //exitShell();
-
-    return EXIT_SUCCESS;
 }
 
 void init_shell(Env_vars *env_vars) {
+    env_vars->hist_count = 0;
     env_vars->cwd = getenv("HOME");
     env_vars->user = getenv("USER");
 
@@ -33,10 +30,11 @@ void init_shell(Env_vars *env_vars) {
 }
 
 void loop_shell(Env_vars *env_vars) {
-    char *input;
-    char **args;
+    int status = 1;
+    char *input = malloc(sizeof(char) * MAX_COMMAND_LENGTH);
+    char **args;    
     
-    do {
+    while (1) {
         bgreen();
         printf("%s: ", env_vars->user);
         bblue();
@@ -44,35 +42,128 @@ void loop_shell(Env_vars *env_vars) {
         reset_colour();
         
         input = read_input();
-        add_history(input);
-        args = tokenise_input(input);
-        if (args[0] != NULL) execute_alias(args, env_vars);
+        if (input[0] == '\n') { continue; }
+        else {
+            if (exec_history(input, env_vars)) {
+                args = tokenise_input(input);
+                execute_alias(args, env_vars);
+            } else { continue; }
+        }        
 
         free(input);
         free(args);
-    } while (1);
-}
-
-char *read_input() {
-    char *str = malloc(sizeof(char) * MAX_COMMAND_LENGTH);
-
-    if (!str) {
-        bred();
-        fprintf(stderr, MEM_ALLOC_ERROR);
-        reset_colour();
-        exit(EXIT_FAILURE);
-    } else if (NULL == fgets(str, MAX_COMMAND_LENGTH, stdin)) {
-        printf("\n");
-        exit(EXIT_SUCCESS);
-    } else {
-        return str;
     }
 }
 
-void add_history(char *input) {
-    strcpy(hist[Hist_numb], input); 
-    Hist_numb  = (Hist_numb + 1) % 20;
-    count++;
+char *read_input() {
+    char *input = malloc(sizeof(char) * MAX_COMMAND_LENGTH);
+
+    if (!input) {
+        bred();
+        fprintf(stderr, MEM_ALLOC_ERROR);
+        reset_colour();
+        exit(0);
+    } else if (NULL == fgets(input, MAX_COMMAND_LENGTH, stdin)) {
+        printf("\n");
+        exit(0);
+    } else {
+        return input;
+    }
+}
+
+int exec_history(char *input, Env_vars *env_vars) {
+    /*if a history command*/
+    if (input[0] == '!') {
+        int index;
+        
+        /*if second character is a number*/
+        if (isdigit(input[1])) {
+            index = input[1] - '0';
+
+            /*if number has 2 digits*/
+            if (isdigit(input[2])) {
+                index = (input[2] - '0')*10 + input[1];
+
+                /*if index is out of range of history*/
+                if (index > env_vars->hist_count) {
+                    printf("Shell: History index out of range\n");
+                    return 0;
+                } 
+                /*invoke command from history*/
+                else {
+                    strcpy(input, env_vars->history[index]);
+                    return 1;
+                }
+            } else if (input[2] == '\n') {
+                if (index > env_vars->hist_count) {
+                    printf("Shell: History index out of range\n");
+                    return 0;
+                } else {
+                    strcpy(input, env_vars->history[index-1]);
+                    return 1;
+                }
+            }
+            /*if third character is an invalid argument*/
+            else { 
+                printf("%s: Not a valid history argument\n", input); 
+                return 0;
+            } 
+        } 
+        /*if second character is '-'*/
+        else if (input[1] == '-') {
+            /*if third character is a number*/
+            if (isdigit(input[2])) {
+                index = input[2] - '0';
+
+                /*if number has 2 digits*/
+                if (isdigit(input[3])) {
+                    index = (input[3] - '0')*10 + input[3];
+                } 
+            } else { 
+                printf("%s: Not a valid history argument\n", input); 
+                return 0;
+            }
+        }
+        /*if second character is '!'*/
+        else if (input[1] == '!') {
+            /*if third character is an invalid argument*/
+            if (input[2] != '\n') { 
+                printf("%s: Not a valid history argument\n", input);
+                return 0;
+            } 
+            /*invoke last command from history*/
+            else {
+                index = env_vars->hist_count;
+                strcpy(input, env_vars->history[index-1]);
+                return 1;
+            }
+        }
+        /*if second character is an invalid argument*/
+        else { 
+            printf("%s: Not a valid history argument\n", input); 
+            return 0;
+        }
+    }
+    /*if not a history command*/
+    else {
+        add_history(input, env_vars);
+        return 1;
+    }
+}
+
+void add_history(char *input, Env_vars *env_vars) {
+    char input2[MAX_COMMAND_LENGTH];
+    
+    strcpy(input2, input);
+    if (env_vars->hist_count < MAX_HIST_NUM) {
+        strcpy(env_vars->history[env_vars->hist_count], input); 
+        env_vars->hist_count++;
+    } else {
+        for (int i = 0; i < MAX_HIST_NUM-1; i++) {
+            strcpy(env_vars->history[i], env_vars->history[i+1]);
+        }
+        strcpy(env_vars->history[env_vars->hist_count-1], input);
+    }
 }
 
 char **tokenise_input(char *input) {
@@ -105,30 +196,30 @@ char **tokenise_input(char *input) {
     return tokens;
 }
 
+//Checks if the input command is an alias
+void execute_alias(char **arg, Env_vars *env_vars){
+    int alias = 0;
+    for (int i = 0; i < 10; i++) {
+        if (0 == strcmp(arg[0], env_vars->aliases[i].alias_name)){
+            char **command = tokenise_input(env_vars->aliases[i].alias_command);
+            execute_command(command, env_vars);
+            alias = 1;
+        }  
+    }
+    if (0 == alias){
+        execute_command(arg, env_vars);
+    }
+}
+
 void execute_command(char **args, Env_vars *env_vars) {
     if (strcmp(args[0], "getpath") == 0) {
-        printf("%s\n", getenv("PATH"));
+        get_path(args);
     } else if (strcmp(args[0], "setpath") == 0) {
-        set_path(args[1]);
+        set_path(args);
     } else if (strcmp(args[0], "cd") == 0) {
         change_dir(args[1], env_vars);
-    } else if (strcspn(args[0], "!") == 0) {
-        exec_history(args, env_vars);
-    } else if(strcmp(args[0], "writehistory") == 0) { 
-       if(write_history_tofile() == 0) {
-           printf("Writing to history to file, failed! \n");
-       } else { 
-            printf("Writing to history to file is successfull. \n"); 
-       }
-
-       } else if(strcmp(args[0], "loadhistory") == 0) {
-           if(LoadHistory() == 0) { 
-               printf("Error, File does not exist! \n");
-           } else {
-               printf("Success file has been loaded. \n");
-           }
     } else if (strcmp(args[0], "history") == 0) { 
-        history();        
+        history(env_vars);        
     } else if (strcmp(args[0], "alias") == 0){
         if (args[1] != NULL){
             addAlias(args, env_vars);
@@ -144,9 +235,36 @@ void execute_command(char **args, Env_vars *env_vars) {
     } 
 }
 
-void set_path(char *arg) {
-    if (NULL == arg) printf("Error: Missing path argument\n") ;
-    else if (0 != setenv("PATH", arg, 1)) perror("Shell");
+void get_path(char **args) {
+    if (args[1] != NULL) {
+        bred();
+        printf("getpath: Too many arguemnts\n");
+        reset_colour();
+    } else {
+        printf("%s\n", getenv("PATH"));
+    }
+}
+
+void set_path(char **args) {
+    if (NULL == args[1]) {
+        bred();
+        printf("setpath: Missing path argument\n") ;
+        reset_colour();
+    } else if (NULL != args[2]) {
+        bred();
+        printf("setpath: Too many arguments\n");
+        reset_colour();
+    } else {
+        if (0 != setenv("PATH", args[1], 1)) {
+            bred();
+            perror(args[0]);
+            reset_colour();
+        } else {
+            byellow();
+            printf("setpath: path set\n");
+            reset_colour();
+        }
+    }
 }
 
 void change_dir(char *arg, Env_vars *env_vars) {
@@ -166,281 +284,13 @@ void change_dir(char *arg, Env_vars *env_vars) {
     }
 }
 
-void history() {
-    if(count < 20) {
-        for(int i=0; i <= count-1; i++) {
-            printf("Command %d: %s",i+1,hist[i]);
-        }
-    } else { 
-        for(int i=0; i < 20; i++) {
-            printf("Command %d: %s",i+1,hist[Hist_numb]);
-            Hist_numb = (Hist_numb + 1) % 20;
-        }
+void history(Env_vars *env_vars) {
+    for (int i = 0; i <= env_vars->hist_count-1; i++) {
+        printf("%d: %s",i+1, env_vars->history[i]);
     }
 }
 
-
-int exec_external(char **args){ 
-    pid_t pid, wpid;
-    int status;
-    
-    pid = fork();
-    if (pid == 0) {
-        // Child Process
-        if (-1 == execvp(args[0], args)) {
-            perror("Shell");
-        }
-        exit(EXIT_FAILURE);
-    } else if (pid < 0) {
-        // Error Forking
-        perror("Shell");
-    } else {
-        //Parent Process
-        do {
-            wpid = waitpid(pid, &status, WUNTRACED);
-        } while (!WIFEXITED(status) && !WIFSIGNALED(status));
-    }
-} 
-
-//Tokenise Method breaking history.
-void exec_history(char **args, Env_vars *env_vars) {
-    //Holds the return from tokenise
-   char  **temp;
-   char  **temp2;
-   //Holds the value  of input from ! to compare when using array 
-    int value;
-    //Creates a copy to allows to trash the array without effecting main array
-    char TempValue[1][512];
-   //This is for !!
-     if(strcmp(args[0], "!!") == 0){
-         if(Hist_numb == 1 && count == 1) {
-             printf("There is no previous command to call! \n");
-             Hist_numb--;
-             count--;
-             return;
-         }
-         printf("Executing last command\n");
-         if(Hist_numb == 0 && count >= 20) { 
-           if(strcmp(hist[18],"history\n") == 0){
-             Hist_numb = 19;
-             count--;
-            strcpy(TempValue[0], hist[18]);
-             temp = tokenise_input(TempValue[0]);
-            execute_command(temp, env_vars);
-            return;
-         }
-         strcpy(hist[19], hist[18]); 
-         strcpy(TempValue[0], hist[19]); 
-        temp = tokenise_input(TempValue[0]);
-         } else if(Hist_numb == 1 && count >= 20) { 
-              if(strcmp(hist[19],"history\n") == 0){ 
-                  Hist_numb = 0;
-                  count--;
-                  strcpy(TempValue[0], hist[19]);
-                  temp = tokenise_input(TempValue[0]);
-                  execute_command(temp, env_vars);
-              }
-            strcpy(hist[0], hist[19]); 
-            strcpy(TempValue[0], hist[0]); 
-            temp = tokenise_input(TempValue[0]);
-         } else {
-         strcpy(hist[Hist_numb-1], hist[Hist_numb-2]); 
-         strcpy(TempValue[0], hist[Hist_numb-1]);
-         if(strcmp(TempValue[0],"history\n") == 0){
-             Hist_numb--;
-             count--;
-         }
-        temp = tokenise_input(TempValue[0]);
-         }
-
-        execute_command(temp, env_vars);
-        return;
-           //This is for !-<no>
-         } else if(args[0][1] == 45 ) {
-         if(args[0][2] >= 48 && args[0][2] <= 57) {
-             if(args[0][3] == 0) {
-                value =  (Hist_numb - 1) - ((args[0][2])-48);
-                if(value < 0) {
-                    value = value + 20;
-                }
-             } else {
-                 value = (((args[0][2]-48)*10) + args[0][3])-48;
-                 value = (Hist_numb - 1) - value;
-                 if(value < 0) {
-                     value = value + 20;
-                 }
-             } 
-         if(value <= count-1 && value >= 0 && value < 20) { 
-              if(Hist_numb == 0) { 
-              if(strcmp(hist[value],"history\n") == 0){
-             Hist_numb = 19;
-             count--;
-            strcpy(TempValue[0], hist[value]);
-             temp = tokenise_input(TempValue[0]);
-            execute_command(temp, env_vars);
-            return;
-          }
-             strcpy(hist[19], hist[value]);
-                 } else {
-           if(strcmp(hist[value],"history\n") == 0){
-             Hist_numb--;
-             count--;
-            strcpy(TempValue[0], hist[value]);
-             temp = tokenise_input(TempValue[0]);
-            execute_command(temp, env_vars);
-            return;
-           }
-         strcpy(hist[Hist_numb-1], hist[value]); 
-             }
-        strcpy(TempValue[0], hist[value]); 
-        temp = tokenise_input(TempValue[0]);
-        execute_command(temp, env_vars);
-        return;
-         } else {
-           printf("You cannot select a value out of range of the history!\n");
-           if(Hist_numb == 0) {
-              count = count - 1;
-              Hist_numb = 19;
-           } else {
-            count = count - 1;
-            Hist_numb = Hist_numb - 1;
-           }
-           return;
-       }
-     }  else {
-        printf("Please enter a integer command! e.g. !2 , !-2, !! \n");
-           if(Hist_numb == 0) {
-              count = count - 1;
-              Hist_numb = 19;
-           } else {
-            count = count - 1;
-            Hist_numb = Hist_numb - 1;
-           }
-           return;
-       }
-          }  else if(args[0][1] >= 48 && args[0][1] <= 57) {
-         if(args[0][2] == 0) {
-           value = (args[0][1])-49;
-         } else {
-             value = (((args[0][1]-48)*10) + args[0][2])-49;
-         }
-         if(value < count-1 && value >= 0 && value <= 20) {
-             if(count > 20) {
-            value = value + Hist_numb;
-             }
-            if(value > 20) {
-                value = value - 21;
-            }
-             if(Hist_numb == 0) { 
-             if(strcmp(hist[value],"history\n") == 0){
-             Hist_numb = 19;
-             count--;
-            strcpy(TempValue[0], hist[value]);
-             temp = tokenise_input(TempValue[0]);
-            execute_command(temp, env_vars);
-            return;
-          }
-             strcpy(hist[19], hist[value]);
-             } else {
-           if(strcmp(hist[value],"history\n") == 0){
-             Hist_numb--;
-             count--;
-            strcpy(TempValue[0], hist[value]);
-             temp = tokenise_input(TempValue[0]);
-            execute_command(temp, env_vars);
-            return;
-           }
-         strcpy(hist[Hist_numb-1], hist[value]); 
-             }
-        strcpy(TempValue[0], hist[value]); 
-        temp = tokenise_input(TempValue[0]);
-        execute_command(temp, env_vars);
-        return;
-     } else {
-         printf("You cannot select a value out of range of the history! \n");
-           if(Hist_numb == 0) {
-              count = count - 1;
-              Hist_numb = 19;
-           } else {
-            count = count - 1;
-            Hist_numb = Hist_numb - 1;
-           }
-           return;
-       } 
-       } else {
-               if(args[0][1] <= 48 || args[0][1] >= 57 ) {
-        printf("Please enter a integer command! e.g. !2 , !-2, !! \n");
-           if(Hist_numb == 0) {
-              count = count - 1;
-              Hist_numb = 19;
-           } else {
-            count = count - 1;
-            Hist_numb = Hist_numb - 1;
-           }
-           return;
-        }
-    }
-  }  
-
-  int write_history_tofile() {
-      FILE *fp;
-
-
-      fp = fopen(HistoryFile, "w"); 
-
-      if(fp != NULL) {
-          if(count < 20) {
-               for(int i=0; i < count-1; i++) {
-               fprintf(fp, "%s",hist[i]); 
-              }
-            fclose(fp);
-            return 1;
-              } else {
-              for(int i=0; i < 19; i++) {
-              fprintf(fp, "%s",hist[Hist_numb]); 
-              Hist_numb = (Hist_numb + 1) % 20;
-              }
-              fclose(fp); 
-              return 1;
-          }
-      } else {
-          printf("Error, Could not find file! \n");
-          return 0; 
-      }
-     fclose(fp);
-  }
-
- int LoadHistory () {
-      FILE *fp;
-      char line[512];
-      Hist_numb = 0;
-      count = 0;
-
-      fp = fopen(HistoryFile, "r");
-
-      if(fp == NULL) {
-          return 0;
-      }
-      
-      while(1) { 
-         if(fgets(line, 512, fp) == NULL) {
-         break;
-      }
-      //setting last char to a new line!
-        line[strlen(line)-1] = '\n';
-        AddHistory(line);
-  }
-         fclose(fp);
-         return 1;
- }
-   
-    void AddHistory(char *line)  {
-        strcpy(hist[Hist_numb], line);
-        Hist_numb = (Hist_numb + 1) % 20;
-        count ++;
-        return;
-    }
-  void addAlias(char **arg, Env_vars *env_vars){
+void addAlias(char **arg, Env_vars *env_vars){
     int i = 3;
     int replace = 0;
     char aliasCommand[MAX_COMMAND_LENGTH] = "";
@@ -481,9 +331,9 @@ void exec_history(char **args, Env_vars *env_vars) {
             printf("You have reached the limit of 10 aliases\n");
         }
     }
-  }    
+}
 
-//Prints the ALias arrays
+  //Prints the ALias arrays
 void printAliases(Env_vars *env_vars) {
     if (NumOfAliases == 0){
         printf("There are currently no Aliases set\n");
@@ -495,45 +345,107 @@ void printAliases(Env_vars *env_vars) {
     }
 }
 
-
 void removeAlias(char **arg, Env_vars *env_vars) {
-    // Checking if there are any existing aliases.
-        if (NumOfAliases == 0) {
-            printf("There are no aliases set. \n");
-        }
-        // Checking if the alias exists.
-        else if (arg != NULL) {
-            for (int i = 0; i < NumOfAliases; i++) {
-                if (strcmp (arg[1], env_vars->aliases[i].alias_name) == 0) {
-                    // Deleting the alias.
-                    printf ("Alias '%s' has been deleted. \n", env_vars->aliases[i].alias_name);
-                    strcpy (env_vars->aliases[i].alias_command, "");
-                    // Moving all elements after NULL gap to the left by one.
-                    /* for (int j = i + 1; j < NumOfAliases; j++) {
-                        env_vars->aliases[j - 1] = env_vars->aliases[j]; */
-                        }
-                    }
+    if (NumOfAliases == 0) {
+        printf("There are no aliases.");
+        // ^^Checking if there are any existing aliases^^
+    }
+    else if (arg != NULL) {
+        for (int i = 0; i < NumOfAliases; i++) {
+            if (strcmp(arg[1], env_vars->aliases[i].alias_name)) {
+                // ^^Checking if the alias exists^^
+                strcpy(env_vars->aliases[i].alias_command, "");
+                NumOfAliases = NumOfAliases - 1;
+                // ^^Deleting the alias^^
+                for (int j = i + 1; j < NumOfAliases; j++) {
+                    env_vars->aliases[j - 1] = env_vars->aliases[j];
+                    // ^^ Moving all elements after NULL gap to the left by one^^
                 }
         else {
             // If the argument doesn't match any existing alias. (Broken)
             printf("Please input an alias! \n");
             }
-        }   
-        //There will be a segmentation fault if you type "unalias" when there are aliases set.
-        //If you remove an alias the code then print alias the shell will print "alias [name] = ' ' "      
-
-
-//Executes the alias command if theres an alias otherwise execute the command
-void execute_alias(char **arg, Env_vars *env_vars){
-    int alias = 0;
-    for (int i = 0; i < 10; i++) {
-        if (strcmp(arg[0], env_vars->aliases[i].alias_name) == 0){
-            char **command = tokenise_input(env_vars->aliases[i].alias_command);
-            execute_command(command, env_vars);
-            alias = 1;
-        }  
-    }
-    if (alias == 0){
-        execute_command(arg, env_vars);
+        }
+    } else {
+        printf("This alias doesn't exist.");
+        // ^^If the argument doesn't match any existing alias^^
     }
 }
+
+int exec_external(char **args){ 
+    pid_t pid, wpid;
+    int status;
+    
+    pid = fork();
+    if (pid == 0) {
+        // Child Process
+        if (-1 == execvp(args[0], args)) {
+            perror(args[0]);
+        }
+        exit(EXIT_FAILURE);
+    } else if (pid < 0) {
+        // Error Forking
+        perror(args[0]);
+    } else {
+        //Parent Process
+        do {
+            wpid = waitpid(pid, &status, WUNTRACED);
+        } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+    }
+} 
+
+//   int write_history_tofile() {
+//       FILE *fp;
+
+//       fp = fopen(HistoryFile, "w"); 
+
+//       if(fp != NULL) {
+//           if(count < 20) {
+//                for(int i=0; i < count-1; i++) {
+//                fprintf(fp, "%s",hist[i]); 
+//               }
+//             fclose(fp);
+//             return 1;
+//               } else {
+//               for(int i=0; i < 19; i++) {
+//               fprintf(fp, "%s",hist[Hist_numb]); 
+//               Hist_numb = (Hist_numb + 1) % 20;
+//               }
+//               fclose(fp); 
+//               return 1;
+//           }
+//       } else {
+//           printf("Error, Could not find file! \n");
+//           return 0; 
+//       }
+//      fclose(fp);
+//   }
+
+//  int LoadHistory () {
+//       FILE *fp;
+//       char line[512];
+//       Hist_numb = 0;
+//       count = 0;
+
+//       fp = fopen(HistoryFile, "r");
+
+//       if(fp == NULL) {
+//           return 0;
+//       }
+      
+//       while(1) { 
+//          if(fgets(line, 512, fp) == NULL) {
+//          break;
+//       }
+//       //setting last char to a new line!
+//         line[strlen(line)-1] = '\n';
+//         add_history(line);
+//   }
+//          fclose(fp);
+//          return 1;
+//  }
+
+//  void exit_shell(Env_vars *env_vars) {
+
+//  }
+ 

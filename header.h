@@ -2,15 +2,23 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <ctype.h>
 #include <sys/wait.h> 
 #include <sys/stat.h>
 #include "print_colours_head.h"
 #define MAX_COMMAND_LENGTH 512
 #define MAX_TOK_NO 50
-#define TOK_DELIM " \t|><&;\n"
+#define MAX_HIST_NUM 20
+#define MAX_ALIAS_NUM 10
+#define TOK_DELIM " \t\n;&><|"
 #define MEM_ALLOC_ERROR "Error: Memory unable to be allocated\n"
 #define DEBUG
-#define HistoryFile "./HistoryFile.txt"
+#define HistoryFile "./.HistoryFile"
+
+typedef struct History {
+    int hist_numb;
+    char hist_command[MAX_COMMAND_LENGTH];
+} History;
 
 typedef struct Alias {
     char alias_name[20];
@@ -18,29 +26,30 @@ typedef struct Alias {
 } Alias;
 
 typedef struct Env_vars {
+    int hist_count;
+    int alias_no;
     char *cwd;
     char *user;
-    Alias aliases[10];
+    char history[MAX_HIST_NUM][MAX_COMMAND_LENGTH];
+    Alias aliases[MAX_ALIAS_NUM];
 } Env_vars;
 
 void init_shell(Env_vars *env_vars);
 void loop_shell(Env_vars *env_vars);
 char *read_input();
-void add_history(char *input);
+void add_history(char *input, Env_vars *env_vars);
 char **tokenise_input(char *input);
 void execute_command(char **args, Env_vars *env_vars);
-void set_path(char* str);
+void get_path(char **args);
+void set_path(char **args);
 void change_dir(char* path, Env_vars *env_vars);
-void history();
+void history(Env_vars *env_vars);
 int exec_external(char **args);
-void exec_history(char **args, Env_vars *env_vars);
+int exec_history(char *input, Env_vars *env_vars);
 int write_history_tofile();
 int LoadHistory();
-void AddHistory(char *line);
 void addAlias(char **arg, Env_vars *env_vars);
 void printAliases(Env_vars *env_vars);
 void execute_alias(char **arg, Env_vars *env_vars);
 void removeAlias(char **arg, Env_vars *env_vars);
-//Defining history structure
-   int Hist_numb;
-   char hist[20][512];
+void exit_shell(Env_vars *env_vars);
