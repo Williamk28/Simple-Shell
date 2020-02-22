@@ -499,7 +499,7 @@ void printAliases(Env_vars *env_vars) {
 void removeAlias(char **arg, Env_vars *env_vars) {
     // Checking if there are any existing aliases.
         if (NumOfAliases == 0) {
-            printf("There are no aliases.");
+            printf("There are no aliases set. \n");
         }
         // Checking if the alias exists.
         else if (arg != NULL) {
@@ -508,19 +508,19 @@ void removeAlias(char **arg, Env_vars *env_vars) {
                     // Deleting the alias.
                     printf ("Alias '%s' has been deleted. \n", env_vars->aliases[i].alias_name);
                     strcpy (env_vars->aliases[i].alias_command, "");
-                    strcpy (env_vars->aliases[i].alias_name, "");
-                    NumOfAliases = NumOfAliases - 1;
-                    /*  // Moving all elements after NULL gap to the left by one.
-                    for (int j = i + 1; j < NumOfAliases; j++) {
+                    // Moving all elements after NULL gap to the left by one.
+                    /* for (int j = i + 1; j < NumOfAliases; j++) {
                         env_vars->aliases[j - 1] = env_vars->aliases[j]; */
+                        }
+                    }
                 }
-            }
-        }
         else {
-            // If the argument doesn't match any existing alias.
-            printf("This alias doesn't exist.");
+            // If the argument doesn't match any existing alias. (Broken)
+            printf("Please input an alias! \n");
             }
-        }       
+        }   
+        //There will be a segmentation fault if you type "unalias" when there are aliases set.
+        //If you remove an alias the code then print alias the shell will print "alias [name] = ' ' "      
 
 
 //Executes the alias command if theres an alias otherwise execute the command
