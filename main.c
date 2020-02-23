@@ -410,7 +410,7 @@ void execute_alias(char **arg, Env_vars *env_vars){
     }
     if (alias == 0){
         execute_command(arg, env_vars);
-        } 
+    }
 }
 
 int exec_external(char **args){ 
