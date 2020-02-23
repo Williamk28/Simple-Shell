@@ -507,17 +507,15 @@ void removeAlias(char **arg, Env_vars *env_vars) {
                 if (strcmp (arg[1], env_vars->aliases[i].alias_name) == 0) {
                     // Deleting the alias.
                     printf ("Alias '%s' has been deleted. \n", env_vars->aliases[i].alias_name);
-                    for (int j = i; j < NumOfAliases; j++) {
-                        env_vars->aliases[j] = env_vars->aliases[j + 1];
-                        i--;
-                    }         
-                    // Moving all elements after NULL gap to the left by one.
-                    /* for (int j = i + 1; j < NumOfAliases; j++) {
-                        env_vars->aliases[j - 1] = env_vars->aliases[j]; */
+                        for (int j = i; j < NumOfAliases; j++) {
+                            env_vars->aliases[j] = env_vars->aliases[j + 1];
+                            i--;
+                        }      
+                        NumOfAliases--;
+                        printf ("Number of Aliases: %d\n", NumOfAliases);   
                         }
                     }
-                    NumOfAliases--;
-                    printf ("Number of Aliases: %d\n", NumOfAliases);
+                    
                 }
         else {
             // If the argument doesn't match any existing alias. (Broken)
