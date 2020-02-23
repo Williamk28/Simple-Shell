@@ -401,12 +401,6 @@ void execute_alias(char **arg, Env_vars *env_vars){
     }
     if (alias == 0){
         execute_command(arg, env_vars);
-        }
-    else {
-        bred();
-        printf("alias: no such alias");
-        reset_colour();
-        // ^^If the argument doesn't match any existing alias^^
     }
 }
 
