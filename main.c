@@ -355,13 +355,16 @@ void printAliases(Env_vars *env_vars) {
     }
     else{
         for(int i = 0; i < env_vars->alias_no; i++){
+            yellow();
             printf("alias %s = '%s'\n", env_vars->aliases[i].alias_name, env_vars->aliases[i].alias_command);
+            reset_colour();
         } 
     }
 }
 
 void removeAlias(char **arg, Env_vars *env_vars) {
     // Checking if an argument is entered.
+    bred();
     if (arg[1] == NULL) {
         printf("Please input an alias to delete. \n");
     }
@@ -374,7 +377,9 @@ void removeAlias(char **arg, Env_vars *env_vars) {
         for (int i = 0; i < env_vars->alias_no; i++) {
             if (strcmp (arg[1], env_vars->aliases[i].alias_name) == 0) {
                 // Moving the specified alias to the end of list.
+                byellow();
                 printf ("Alias '%s' has been deleted. \n", env_vars->aliases[i].alias_name);
+                reset_colour();
                     for (int j = i; j < env_vars->alias_no; j++) {
                         env_vars->aliases[j] = env_vars->aliases[j + 1];
                         i--;
@@ -383,8 +388,12 @@ void removeAlias(char **arg, Env_vars *env_vars) {
                     env_vars->alias_no--;
                     printf ("Number of Aliases: %d\n", env_vars->alias_no);   
                 }
+                else {
+                    printf("No aliases exist with that name\n");
+                }
             }
         }
+        reset_colour();
     }
    
 
@@ -401,13 +410,7 @@ void execute_alias(char **arg, Env_vars *env_vars){
     }
     if (alias == 0){
         execute_command(arg, env_vars);
-        }
-    else {
-        bred();
-        printf("alias: no such alias");
-        reset_colour();
-        // ^^If the argument doesn't match any existing alias^^
-    }
+        } 
 }
 
 int exec_external(char **args){ 
