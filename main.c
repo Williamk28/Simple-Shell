@@ -1,7 +1,5 @@
 #include "header.h"
 
-int NumOfAliases = 0;
-
 void main() {
     
     Env_vars env_vars;
@@ -12,7 +10,8 @@ void main() {
 }
 
 void init_shell(Env_vars *env_vars) {
-    env_vars->hist_count = 0;
+    env_vars->hist_no = 0;
+    env_vars->alias_no = 0;
     env_vars->cwd = getenv("HOME");
     env_vars->user = getenv("USER");
 
@@ -83,7 +82,7 @@ int exec_history(char *input, Env_vars *env_vars) {
                 index = (input[2] - '0')*10 + input[1];
 
                 /*if index is out of range of history*/
-                if (index > env_vars->hist_count) {
+                if (index > env_vars->hist_no) {
                     bred();
                     printf("Shell: History index out of range\n");
                     reset_colour();
@@ -95,7 +94,7 @@ int exec_history(char *input, Env_vars *env_vars) {
                     return 1;
                 }
             } else if (input[2] == '\n') {
-                if (index > env_vars->hist_count) {
+                if (index > env_vars->hist_no) {
                     bred();
                     printf("Shell: History index out of range\n");
                     reset_colour();
@@ -141,7 +140,7 @@ int exec_history(char *input, Env_vars *env_vars) {
             } 
             /*invoke last command from history*/
             else {
-                index = env_vars->hist_count;
+                index = env_vars->hist_no;
                 strcpy(input, env_vars->history[index-1]);
                 return 1;
             }
@@ -165,14 +164,14 @@ void add_history(char *input, Env_vars *env_vars) {
     char input2[MAX_COMMAND_LENGTH];
     
     strcpy(input2, input);
-    if (env_vars->hist_count < MAX_HIST_NUM) {
-        strcpy(env_vars->history[env_vars->hist_count], input); 
-        env_vars->hist_count++;
+    if (env_vars->hist_no < MAX_HIST_NUM) {
+        strcpy(env_vars->history[env_vars->hist_no], input); 
+        env_vars->hist_no++;
     } else {
         for (int i = 0; i < MAX_HIST_NUM-1; i++) {
             strcpy(env_vars->history[i], env_vars->history[i+1]);
         }
-        strcpy(env_vars->history[env_vars->hist_count-1], input);
+        strcpy(env_vars->history[env_vars->hist_no-1], input);
     }
 }
 
@@ -209,7 +208,7 @@ char **tokenise_input(char *input) {
 //Checks if the input command is an alias
 void execute_alias(char **arg, Env_vars *env_vars){
     int alias = 0;
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < env_vars->alias_no; i++) {
         if (0 == strcmp(arg[0], env_vars->aliases[i].alias_name)){
             char **command = tokenise_input(env_vars->aliases[i].alias_command);
             execute_command(command, env_vars);
@@ -304,15 +303,15 @@ void change_dir(char **args, Env_vars *env_vars) {
 }
 
 void history(Env_vars *env_vars) {
-    for (int i = 0; i <= env_vars->hist_count-1; i++) {
+    for (int i = 0; i <= env_vars->hist_no-1; i++) {
         printf("%d: %s",i+1, env_vars->history[i]);
     }
 }
 
 void addAlias(char **arg, Env_vars *env_vars){
-    int i = 3;
     int replace = 0;
     char aliasCommand[MAX_COMMAND_LENGTH] = "";
+
     //Checks if the alias command is not empty
     if (arg[2] == NULL){
         bred();
@@ -322,30 +321,31 @@ void addAlias(char **arg, Env_vars *env_vars){
     else {
         //Concatenates the rest of the commnad line as one command after the 3rd argument
         strcpy(aliasCommand, arg[2]);
+        int i = 3;
         while (arg[i] != NULL){
             strcat(aliasCommand, " ");
             strcat(aliasCommand, arg[i]);
             i++;
         }
         //Checks if an alias with the same name exists
-        for (int i = 0; i < NumOfAliases; i++) {
+        for (int i = 0; i < env_vars->alias_no; i++) {
             if (strcmp(arg[1], env_vars->aliases[i].alias_name) == 0){
                 //Replace the first command with the second 
                 strcpy(env_vars->aliases[i].alias_command, aliasCommand);
+                replace = 1;
                 byellow();
                 printf("Alias has been replaced\n"); 
                 reset_colour();
-                replace = 1;
             }
         }
         //Adds the alias unless it reached the limit
-        if (NumOfAliases < 10 && replace == 0){
-            strcpy(env_vars->aliases[NumOfAliases].alias_name, arg[1]);
-            strcpy(env_vars->aliases[NumOfAliases].alias_command, aliasCommand);
-            NumOfAliases++;
+        if (env_vars->alias_no < 10 && replace == 0){
+            strcpy(env_vars->aliases[env_vars->alias_no].alias_name, arg[1]);
+            strcpy(env_vars->aliases[env_vars->alias_no].alias_command, aliasCommand);
+            env_vars->alias_no++;
             byellow();
             printf("Alias '%s' has been added \n", arg[1]);
-            printf("Number of Aliases %d\n", NumOfAliases);
+            printf("Number of Aliases %d\n", env_vars->alias_no);
             reset_colour();
         }
         //If alias has been replaced then do nothing
@@ -362,31 +362,31 @@ void addAlias(char **arg, Env_vars *env_vars){
 
   //Prints the ALias arrays
 void printAliases(Env_vars *env_vars) {
-    if (NumOfAliases == 0){
-        bred();
-        printf("There are currently no Aliases set\n");
+    if (env_vars->alias_no == 0){
+        byellow();
+        printf("alias: There are currently no aliases set\n");
         reset_colour();
     }
     else{
-        for(int i = 0; i < NumOfAliases; i++){
+        for(int i = 0; i < env_vars->alias_no; i++){
             printf("alias %s = '%s'\n", env_vars->aliases[i].alias_name, env_vars->aliases[i].alias_command);
         } 
     }
 }
 
 void removeAlias(char **arg, Env_vars *env_vars) {
-    if (NumOfAliases == 0) {
+    if (env_vars->alias_no == 0) {
         printf("There are no aliases.");
         // ^^Checking if there are any existing aliases^^
     }
     else if (arg != NULL) {
-        for (int i = 0; i < NumOfAliases; i++) {
+        for (int i = 0; i < env_vars->alias_no; i++) {
             if (strcmp(arg[1], env_vars->aliases[i].alias_name)) {
                 // ^^Checking if the alias exists^^
                 strcpy(env_vars->aliases[i].alias_command, "");
-                NumOfAliases = NumOfAliases - 1;
+                env_vars->alias_no--;
                 // ^^Deleting the alias^^
-                for (int j = i + 1; j < NumOfAliases; j++) {
+                for (int j = i + 1; j < env_vars->alias_no; j++) {
                     env_vars->aliases[j - 1] = env_vars->aliases[j];
                     // ^^ Moving all elements after NULL gap to the left by one^^
                 }
@@ -396,7 +396,9 @@ void removeAlias(char **arg, Env_vars *env_vars) {
             }
         }
     } else {
-        printf("This alias doesn't exist.");
+        bred();
+        printf("alias: no such alias");
+        reset_colour();
         // ^^If the argument doesn't match any existing alias^^
     }
 }

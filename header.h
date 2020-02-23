@@ -26,7 +26,7 @@ typedef struct Alias {
 } Alias;
 
 typedef struct Env_vars {
-    int hist_count;
+    int hist_no;
     int alias_no;
     char *cwd;
     char *user;
