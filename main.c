@@ -515,7 +515,6 @@ void removeAlias(char **arg, Env_vars *env_vars) {
                         printf ("Number of Aliases: %d\n", NumOfAliases);   
                         }
                     }
-                    
                 }
         else {
             // If the argument doesn't match any existing alias. (Broken)
