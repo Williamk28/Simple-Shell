@@ -42,7 +42,7 @@ char **tokenise_input(char *input);
 void execute_command(char **args, Env_vars *env_vars);
 void get_path(char **args);
 void set_path(char **args);
-void change_dir(char* path, Env_vars *env_vars);
+void change_dir(char **args, Env_vars *env_vars);
 void history(Env_vars *env_vars);
 int exec_external(char **args);
 int exec_history(char *input, Env_vars *env_vars);

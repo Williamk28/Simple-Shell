@@ -1,7 +1,5 @@
 #include "header.h"
 
-int Hist_numb = 0;
-int count = 0;
 int NumOfAliases = 0;
 
 void main() {
@@ -86,7 +84,9 @@ int exec_history(char *input, Env_vars *env_vars) {
 
                 /*if index is out of range of history*/
                 if (index > env_vars->hist_count) {
+                    bred();
                     printf("Shell: History index out of range\n");
+                    reset_colour();
                     return 0;
                 } 
                 /*invoke command from history*/
@@ -96,7 +96,9 @@ int exec_history(char *input, Env_vars *env_vars) {
                 }
             } else if (input[2] == '\n') {
                 if (index > env_vars->hist_count) {
+                    bred();
                     printf("Shell: History index out of range\n");
+                    reset_colour();
                     return 0;
                 } else {
                     strcpy(input, env_vars->history[index-1]);
@@ -105,7 +107,9 @@ int exec_history(char *input, Env_vars *env_vars) {
             }
             /*if third character is an invalid argument*/
             else { 
-                printf("%s: Not a valid history argument\n", input); 
+                bred();
+                printf("%s: Not a valid history argument\n", input);
+                reset_colour(); 
                 return 0;
             } 
         } 
@@ -119,8 +123,10 @@ int exec_history(char *input, Env_vars *env_vars) {
                 if (isdigit(input[3])) {
                     index = (input[3] - '0')*10 + input[3];
                 } 
-            } else { 
+            } else {
+                bred(); 
                 printf("%s: Not a valid history argument\n", input); 
+                reset_colour();
                 return 0;
             }
         }
@@ -128,7 +134,9 @@ int exec_history(char *input, Env_vars *env_vars) {
         else if (input[1] == '!') {
             /*if third character is an invalid argument*/
             if (input[2] != '\n') { 
+                bred();
                 printf("%s: Not a valid history argument\n", input);
+                reset_colour();
                 return 0;
             } 
             /*invoke last command from history*/
@@ -140,7 +148,9 @@ int exec_history(char *input, Env_vars *env_vars) {
         }
         /*if second character is an invalid argument*/
         else { 
+            bred();
             printf("%s: Not a valid history argument\n", input); 
+            reset_colour();
             return 0;
         }
     }
@@ -217,7 +227,7 @@ void execute_command(char **args, Env_vars *env_vars) {
     } else if (strcmp(args[0], "setpath") == 0) {
         set_path(args);
     } else if (strcmp(args[0], "cd") == 0) {
-        change_dir(args[1], env_vars);
+        change_dir(args, env_vars);
     } else if (strcmp(args[0], "history") == 0) { 
         history(env_vars);        
     } else if (strcmp(args[0], "alias") == 0){
@@ -251,7 +261,9 @@ void set_path(char **args) {
         printf("setpath: Missing path argument\n") ;
         reset_colour();
     } else if (NULL != args[2]) {
-        bred();
+        bred();bred();
+        printf("cd: Too many arguemnts\n");
+        reset_colour();
         printf("setpath: Too many arguments\n");
         reset_colour();
     } else {
@@ -267,17 +279,24 @@ void set_path(char **args) {
     }
 }
 
-void change_dir(char *arg, Env_vars *env_vars) {
-    if(NULL == arg) {
+void change_dir(char **args, Env_vars *env_vars) {
+    if(NULL == args[1]) {
         if (0 != chdir(getenv("HOME"))) {
-            perror("Shell");
+            bred();
+            perror("cd");
+            reset_colour();
         } else {
             env_vars->cwd = getenv("HOME");
         }        
+    } else if (NULL != args[2]) {
+        bred();
+        printf("cd: Too many arguemnts\n");
+        reset_colour();
     } else {
-
-        if (0 != chdir(arg)) {
-            perror(arg);
+        if (0 != chdir(args[1])) {
+            bred();
+            perror(args[1]);
+            reset_colour();
         } else {
             env_vars->cwd = getcwd(NULL, 0);
         }
@@ -296,7 +315,9 @@ void addAlias(char **arg, Env_vars *env_vars){
     char aliasCommand[MAX_COMMAND_LENGTH] = "";
     //Checks if the alias command is not empty
     if (arg[2] == NULL){
+        bred();
         printf("Not enough Parameters\n");
+        reset_colour();
     }
     else {
         //Concatenates the rest of the commnad line as one command after the 3rd argument
@@ -311,7 +332,9 @@ void addAlias(char **arg, Env_vars *env_vars){
             if (strcmp(arg[1], env_vars->aliases[i].alias_name) == 0){
                 //Replace the first command with the second 
                 strcpy(env_vars->aliases[i].alias_command, aliasCommand);
+                byellow();
                 printf("Alias has been replaced\n"); 
+                reset_colour();
                 replace = 1;
             }
         }
@@ -320,15 +343,19 @@ void addAlias(char **arg, Env_vars *env_vars){
             strcpy(env_vars->aliases[NumOfAliases].alias_name, arg[1]);
             strcpy(env_vars->aliases[NumOfAliases].alias_command, aliasCommand);
             NumOfAliases++;
+            byellow();
             printf("Alias '%s' has been added \n", arg[1]);
             printf("Number of Aliases %d\n", NumOfAliases);
+            reset_colour();
         }
         //If alias has been replaced then do nothing
         else if (replace == 1){
             //Do nothing
         }
         else{
+            bred();
             printf("You have reached the limit of 10 aliases\n");
+            reset_colour();
         }
     }
 }
@@ -336,7 +363,9 @@ void addAlias(char **arg, Env_vars *env_vars){
   //Prints the ALias arrays
 void printAliases(Env_vars *env_vars) {
     if (NumOfAliases == 0){
+        bred();
         printf("There are currently no Aliases set\n");
+        reset_colour();
     }
     else{
         for(int i = 0; i < NumOfAliases; i++){
@@ -380,12 +409,16 @@ int exec_external(char **args){
     if (pid == 0) {
         // Child Process
         if (-1 == execvp(args[0], args)) {
+            bred();
             perror(args[0]);
+            reset_colour();
         }
         exit(EXIT_FAILURE);
     } else if (pid < 0) {
         // Error Forking
+        bred();
         perror(args[0]);
+        reset_colour();
     } else {
         //Parent Process
         do {
