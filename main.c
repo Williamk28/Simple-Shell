@@ -508,6 +508,7 @@ void removeAlias(char **arg, Env_vars *env_vars) {
                     // Deleting the alias.
                     printf ("Alias '%s' has been deleted. \n", env_vars->aliases[i].alias_name);
                     strcpy (env_vars->aliases[i].alias_command, "");
+                    strcpy (env_vars->aliases[i].alias_name, "");
                     // Moving all elements after NULL gap to the left by one.
                     /* for (int j = i + 1; j < NumOfAliases; j++) {
                         env_vars->aliases[j - 1] = env_vars->aliases[j]; */
@@ -520,7 +521,7 @@ void removeAlias(char **arg, Env_vars *env_vars) {
             }
         }   
         //There will be a segmentation fault if you type "unalias" when there are aliases set.
-        //If you remove an alias the code then print alias the shell will print "alias [name] = ' ' "      
+        //If you remove an alias the code then print aliases the shell will say "alias = ' ' " for the deleted alias.     
 
 
 //Executes the alias command if theres an alias otherwise execute the command
