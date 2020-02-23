@@ -361,31 +361,32 @@ void printAliases(Env_vars *env_vars) {
 }
 
 void removeAlias(char **arg, Env_vars *env_vars) {
+    // Checking if an argument is entered.
+    if (arg[1] == NULL) {
+        printf("Please input an alias to delete. \n");
+    }
     // Checking if there are any existing aliases.
-        if (env_vars->alias_no == 0) {
-            printf("There are no aliases set. \n");
-        }
-        // Checking if the alias exists.
-        else if (arg != NULL) {
-            for (int i = 0; i < env_vars->alias_no; i++) {
-                if (strcmp (arg[1], env_vars->aliases[i].alias_name) == 0) {
-                    // Deleting the alias.
-                    printf ("Alias '%s' has been deleted. \n", env_vars->aliases[i].alias_name);
-                        for (int j = i; j < env_vars->alias_no; j++) {
-                            env_vars->aliases[j] = env_vars->aliases[j + 1];
-                            i--;
-                        }      
-                        env_vars->alias_no--;
-                        printf ("Number of Aliases: %d\n", env_vars->alias_no);   
-                        }
+    else if (env_vars->alias_no == 0) {
+        printf("There are no aliases set. \n");
+    }
+    // Checking if the alias exists.
+    else if (arg != NULL) {
+        for (int i = 0; i < env_vars->alias_no; i++) {
+            if (strcmp (arg[1], env_vars->aliases[i].alias_name) == 0) {
+                // Moving the specified alias to the end of list.
+                printf ("Alias '%s' has been deleted. \n", env_vars->aliases[i].alias_name);
+                    for (int j = i; j < env_vars->alias_no; j++) {
+                        env_vars->aliases[j] = env_vars->aliases[j + 1];
+                        i--;
                     }
+                    // Deleting the alias.   
+                    env_vars->alias_no--;
+                    printf ("Number of Aliases: %d\n", env_vars->alias_no);   
                 }
-        else {
-            // If the argument doesn't match any existing alias. (Broken)
-            printf("Please input an alias! \n");
             }
-        }   
-        //There will be a segmentation fault if you type "unalias" when there are aliases set.   
+        }
+    }
+   
 
 
 //Executes the alias command if theres an alias otherwise execute the command
