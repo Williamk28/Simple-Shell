@@ -234,11 +234,10 @@ void get_path(char **args) {
     if (args[1] != NULL) {
         bred();
         printf("getpath: Too many arguemnts. Usage: 'getpath'\n");
+        reset_colour();
     } else {
-        yellow();
         printf("%s\n", getenv("PATH"));
     }
-    reset_colour();
 }
 
 void set_path(char **args) {
@@ -250,9 +249,6 @@ void set_path(char **args) {
     } else {
         if (0 != setenv("PATH", args[1], 1)) {
             perror(args[0]);
-        } else {
-            yellow();
-            printf("setpath: path set\n");
         }
     }
     reset_colour();
@@ -280,9 +276,7 @@ void change_dir(char **args, Env_vars *env_vars) {
 
 void history(Env_vars *env_vars) {
     for (int i = 0; i <= env_vars->hist_no-1; i++) {
-        yellow();
         printf("%i: %s",i+1, env_vars->history[i]);
-        reset_colour();
     }
 }
 
@@ -311,8 +305,7 @@ void add_alias(char **arg, Env_vars *env_vars){
                 strcpy(env_vars->aliases[i].alias_command, aliasCommand);
                 replace = 1;
                 yellow();
-                printf("alias: '%s' replaced\n", arg[1]); 
-                reset_colour();
+                printf("alias: '%s' replaced\n", arg[1]);
             }
         }
         //Adds the alias unless it reached the limit
@@ -320,8 +313,6 @@ void add_alias(char **arg, Env_vars *env_vars){
             strcpy(env_vars->aliases[env_vars->alias_no].alias_name, arg[1]);
             strcpy(env_vars->aliases[env_vars->alias_no].alias_command, aliasCommand);
             env_vars->alias_no++;
-            yellow();
-            printf("alias: '%s' added\n", arg[1]);
         }
         //If alias has been replaced then do nothing
         else if (replace == 1){
@@ -343,8 +334,7 @@ void print_aliases(Env_vars *env_vars) {
     }
     else{
         for(int i = 0; i < env_vars->alias_no; i++){
-            yellow();
-            printf("%i %s = '%s'\n",i, env_vars->aliases[i].alias_name, env_vars->aliases[i].alias_command);
+            printf("%i: %s = '%s'\n",i, env_vars->aliases[i].alias_name, env_vars->aliases[i].alias_command);
         } 
     }
     reset_colour();
@@ -362,7 +352,7 @@ void remove_alias(char **args, Env_vars *env_vars) {
     else if (env_vars->alias_no == 0) {
         printf("unalias: No aliases are set\n");
     } else if (args[2] != NULL) {
-        printf("unalias: Too many arguments. Usage: 'unalias <alias name>'");
+        printf("unalias: Too many arguments. Usage: 'unalias <alias name>'\n");
     }
     // Checking if the alias exists.
     else {
@@ -382,7 +372,7 @@ void remove_alias(char **args, Env_vars *env_vars) {
         }
         if(alias == 0) {
             bred();
-            printf("unalias: No such alias: '%s'", args[1]);
+            printf("unalias: No such alias: '%s'\n", args[1]);
         }
     }
     reset_colour();
