@@ -45,9 +45,12 @@ void loop_shell(Env_vars *env_vars) {
         reset_colour();
         
         input = read_input();
-        add_history(input);
-        args = tokenise_input(input);
-        if (args[0] != NULL) execute_alias(args, env_vars);
+        if (input[0] == '\n') { continue; }
+        else {
+            add_history(input);
+            args = tokenise_input(input);
+            if (args[0] != NULL) execute_alias(args, env_vars);
+        }
 
         free(input);
         free(args);
@@ -108,9 +111,9 @@ char **tokenise_input(char *input) {
 
 void execute_command(char **args, Env_vars *env_vars) {
     if (strcmp(args[0], "getpath") == 0) {
-        printf("%s\n", getenv("PATH"));
+        get_path(args);
     } else if (strcmp(args[0], "setpath") == 0) {
-        set_path(args[1]);
+        set_path(args);
     } else if (strcmp(args[0], "cd") == 0) {
         change_dir(args, env_vars);
     } else if (strcspn(args[0], "!") == 0) {
@@ -440,7 +443,7 @@ void exec_history(char **args, Env_vars *env_vars) {
         count ++;
         return;
     }
-  void addAlias(char **arg, Env_vars *env_vars){
+  void add_alias(char **arg, Env_vars *env_vars){
     int i = 3;
     int replace = 0;
     char aliasCommand[MAX_COMMAND_LENGTH] = "";
@@ -580,20 +583,5 @@ int exec_external(char **args){
         do {
             wpid = waitpid(pid, &status, WUNTRACED);
         } while (!WIFEXITED(status) && !WIFSIGNALED(status));
-    }
-} 
-
-//Executes the alias command if theres an alias otherwise execute the command
-void execute_alias(char **arg, Env_vars *env_vars){
-    int alias = 0;
-    for (int i = 0; i < 10; i++) {
-        if (strcmp(arg[0], env_vars->aliases[i].alias_name) == 0){
-            char **command = tokenise_input(env_vars->aliases[i].alias_command);
-            execute_command(command, env_vars);
-            alias = 1;
-        }  
-    }
-    if (alias == 0){
-        execute_command(arg, env_vars);
     }
 }
