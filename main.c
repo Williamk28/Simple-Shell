@@ -43,9 +43,13 @@ void loop_shell(Env_vars *env_vars) {
         reset_colour();
         
         input = read_input();
-        add_history(input);
-        args = tokenise_input(input);
-        execute_command(args, env_vars);
+        if (input[0] == '\n') { continue; }
+        else {
+            add_history(input);
+            args = tokenise_input(input);
+            execute_command(args, env_vars);
+        }
+        
 
         free(input);
         free(args);
