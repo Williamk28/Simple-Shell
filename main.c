@@ -443,6 +443,7 @@ void exec_history(char **args, Env_vars *env_vars) {
         count ++;
         return;
     }
+
   void add_alias(char **arg, Env_vars *env_vars){
     int i = 3;
     int replace = 0;
@@ -498,7 +499,7 @@ void print_aliases(Env_vars *env_vars) {
     }
     else{
         for(int i = 0; i < env_vars->alias_no; i++){
-            printf("%i: %s = '%s'\n",i, env_vars->aliases[i].alias_name, env_vars->aliases[i].alias_command);
+            printf("%i: %s = '%s'\n",i+1, env_vars->aliases[i].alias_name, env_vars->aliases[i].alias_command);
         } 
     }
     reset_colour();
