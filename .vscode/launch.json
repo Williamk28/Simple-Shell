@@ -17,8 +17,8 @@
             "MIMode": "gdb",
             "setupCommands": [
                 {
-                    "description": "Enable pretty-printing and disable detach-on-fork for gdb",
-                    "text": "-enable-pretty-printing -gdb-set detach-on-fork off",
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
                     "ignoreFailures": true
                 }
             ]
