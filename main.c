@@ -229,7 +229,7 @@ void exec_history(char **args, Env_vars *env_vars) {
              count--;
             strcpy(TempValue[0], hist[18]);
              temp = tokenise_input(TempValue[0]);
-            execute_command(temp, env_vars);
+            execute_alias(temp, env_vars);
             return;
          }
          strcpy(hist[19], hist[18]); 
@@ -241,7 +241,7 @@ void exec_history(char **args, Env_vars *env_vars) {
                   count--;
                   strcpy(TempValue[0], hist[19]);
                   temp = tokenise_input(TempValue[0]);
-                  execute_command(temp, env_vars);
+                  execute_alias(temp, env_vars);
               }
             strcpy(hist[0], hist[19]); 
             strcpy(TempValue[0], hist[0]); 
@@ -256,7 +256,7 @@ void exec_history(char **args, Env_vars *env_vars) {
         temp = tokenise_input(TempValue[0]);
          }
 
-        execute_command(temp, env_vars);
+        execute_alias(temp, env_vars);
         return;
            //This is for !-<no>
          } else if(args[0][1] == 45 ) {
@@ -280,7 +280,7 @@ void exec_history(char **args, Env_vars *env_vars) {
              count--;
             strcpy(TempValue[0], hist[value]);
              temp = tokenise_input(TempValue[0]);
-            execute_command(temp, env_vars);
+            execute_alias(temp, env_vars);
             return;
           }
              strcpy(hist[19], hist[value]);
@@ -290,14 +290,14 @@ void exec_history(char **args, Env_vars *env_vars) {
              count--;
             strcpy(TempValue[0], hist[value]);
              temp = tokenise_input(TempValue[0]);
-            execute_command(temp, env_vars);
+            execute_alias(temp, env_vars);
             return;
            }
          strcpy(hist[Hist_numb-1], hist[value]); 
              }
         strcpy(TempValue[0], hist[value]); 
         temp = tokenise_input(TempValue[0]);
-        execute_command(temp, env_vars);
+        execute_alias(temp, env_vars);
         return;
          } else {
            printf("You cannot select a value out of range of the history!\n");
@@ -340,7 +340,7 @@ void exec_history(char **args, Env_vars *env_vars) {
              count--;
             strcpy(TempValue[0], hist[value]);
              temp = tokenise_input(TempValue[0]);
-            execute_command(temp, env_vars);
+            execute_alias(temp, env_vars);
             return;
           }
              strcpy(hist[19], hist[value]);
@@ -350,14 +350,14 @@ void exec_history(char **args, Env_vars *env_vars) {
              count--;
             strcpy(TempValue[0], hist[value]);
              temp = tokenise_input(TempValue[0]);
-            execute_command(temp, env_vars);
+            execute_alias(temp, env_vars);
             return;
            }
          strcpy(hist[Hist_numb-1], hist[value]); 
              }
         strcpy(TempValue[0], hist[value]); 
         temp = tokenise_input(TempValue[0]);
-        execute_command(temp, env_vars);
+        execute_alias(temp, env_vars);
         return;
      } else {
          printf("You cannot select a value out of range of the history! \n");
