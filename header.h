@@ -31,6 +31,9 @@ void exec_history(char **args, Env_vars *env_vars);
 int write_history_tofile();
 int LoadHistory();
 void AddHistory(char *line);
+void HistoryErrorDecrement();
+void HistoryInvokationCheckNormalCase(int value, Env_vars *env_vars);
+void HistoryInvokationCheckEdgeCase(int value, Env_vars *env_vars);
 //Defining history structure
    int Hist_numb;
    char hist[20][512];
