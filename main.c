@@ -230,27 +230,17 @@ void exec_history(char **args, Env_vars *env_vars) {
     //Creates a copy to allows to trash the array without effecting main array
     char TempValue[1][512];
 
-   //This is for !!
-     if(strcmp(args[0], "!!") == 0){
-         if(Hist_numb == 1 && count == 1) {
-             printf("There is no previous command to call! \n");
-             Hist_numb--;
-             count--;
-             return;
-         }
-        if(args[1] != 0) {
+    //This is for !!
+    if (strcmp(args[0], "!!") == 0) {
+        if (Hist_numb == 1 && count == 1) {
+            printf("There is no previous command to call! \n");
+            Hist_numb--;
+            count--;
+            return;
+        }
+        if (args[1] != 0) {
             printf("Too many arguments, please follow the format (!!) \n");
             HistoryErrorDecrement();
-            return;
-         }
-         printf("Executing last command\n");
-         if(Hist_numb == 0 && count >= 20) { 
-           if(strcmp(hist[18],"history\n") == 0){
-             Hist_numb = 19;
-             count--;
-            strcpy(TempValue[0], hist[18]);
-             temp = tokenise_input(TempValue[0]);
-            execute_alias(temp, env_vars);
             return;
         }
         printf("Executing last command\n");
@@ -263,134 +253,144 @@ void exec_history(char **args, Env_vars *env_vars) {
                 execute_alias(temp, env_vars);
                 return;
             }
-            strcpy(hist[19], hist[18]); 
-            strcpy(TempValue[0], hist[19]); 
-            temp = tokenise_input(TempValue[0], env_vars);
-        } else if (Hist_numb == 1 && count >= 20) { 
-            if (strcmp(hist[19],"history\n") == 0) { 
-                Hist_numb = 0;
-                count--;
-                strcpy(TempValue[0], hist[19]);
-                temp = tokenise_input(TempValue[0],env_vars);
-                execute_alias(temp, env_vars);
-            }
-            strcpy(hist[0], hist[19]); 
-            strcpy(TempValue[0], hist[0]); 
-            temp = tokenise_input(TempValue[0], env_vars);
-        } else {
-            strcpy(hist[Hist_numb-1], hist[Hist_numb-2]); 
-            strcpy(TempValue[0], hist[Hist_numb-1]);
-            if (strcmp(TempValue[0],"history\n") == 0) {
-                Hist_numb--;
-                count--;
-            }
-            temp = tokenise_input(TempValue[0], env_vars);
-        }
-        execute_alias(temp, env_vars);
-        return;
-           //This is for !-<no>
-         } else if(args[0][1] == 45 ) {
-            if(args[1] != 0) {
-             printf("Too many arguments, please follow the format (!-<no>) \n");
-             HistoryErrorDecrement();
-             return;
-            }
-         if(args[0][2] >= 48 && args[0][2] <= 57) {
-             if(args[0][3] == 0) {
-                value =  (Hist_numb - 1) - ((args[0][2])-48);
-                if (value < 0) {
-                    value = value + 20;
+            printf("Executing last command\n");
+            if (Hist_numb == 0 && count >= 20) { 
+                if (strcmp(hist[18],"history\n") == 0) {
+                    Hist_numb = 19;
+                    count--;
+                    strcpy(TempValue[0], hist[18]);
+                    temp = tokenise_input(TempValue[0], env_vars);
+                    execute_alias(temp, env_vars);
+                    return;
                 }
+                strcpy(hist[19], hist[18]); 
+                strcpy(TempValue[0], hist[19]); 
+                temp = tokenise_input(TempValue[0], env_vars);
+            } else if (Hist_numb == 1 && count >= 20) { 
+                if (strcmp(hist[19],"history\n") == 0) { 
+                    Hist_numb = 0;
+                    count--;
+                    strcpy(TempValue[0], hist[19]);
+                    temp = tokenise_input(TempValue[0],env_vars);
+                    execute_alias(temp, env_vars);
+                }
+                strcpy(hist[0], hist[19]); 
+                strcpy(TempValue[0], hist[0]); 
+                temp = tokenise_input(TempValue[0], env_vars);
             } else {
-                value = (((args[0][2]-48)*10) + args[0][3])-48;
-                value = (Hist_numb - 1) - value;
-                if (value < 0) {
-                     value = value + 20;
-                 }
-             } 
-         if(value <= count-1 && value >= 0 && value < 20) { 
-              if(Hist_numb == 0) { 
-          if(strcmp(hist[value],"history\n") == 0){
-             HistoryInvokationCheckEdgeCase(value, env_vars);
-            return;
-              }
-             strcpy(hist[19], hist[value]);
-                 } else {
-            if(strcmp(hist[value],"history\n") == 0){
-            HistoryInvokationCheckNormalCase(value, env_vars);
-            return;
+                strcpy(hist[Hist_numb-1], hist[Hist_numb-2]); 
+                strcpy(TempValue[0], hist[Hist_numb-1]);
+                if (strcmp(TempValue[0],"history\n") == 0) {
+                    Hist_numb--;
+                    count--;
+                }
+                temp = tokenise_input(TempValue[0], env_vars);
             }
-           }
-         strcpy(hist[Hist_numb-1], hist[value]); 
-        strcpy(TempValue[0], hist[value]); 
-        temp = tokenise_input(TempValue[0]);
-        execute_command(temp, env_vars);
-        return;
-         } else {
-           printf("You cannot select a value out of range of the history!\n");
-         HistoryErrorDecrement();
-           return;
-       }
-     }  else {
-        printf("Please enter a Integer command! e.g. !2 , !-2, !! \n");
-             HistoryErrorDecrement();
-           return;
-       }
-       // This is for !<no>
-          }  else if(args[0][1] >= 48 && args[0][1] <= 57) {
-             if(args[1] != 0) {
-             printf("Too many arguments, please follow the format (!<no>) \n");
-             HistoryErrorDecrement();
-             return;
+            execute_alias(temp, env_vars);
+            return;
+        //This is for !-<no>
+        } else if (args[0][1] == 45 ) {
+            if (args[1] != 0) {
+                printf("Too many arguments, please follow the format (!-<no>) \n");
+                HistoryErrorDecrement();
+                return;
             }
-         if(args[0][2] == 0) {
-           value = (args[0][1])-49;
-         } else {
-             if(args[0][2] >= 48 && args[0][2] <= 57) {
-             value = (((args[0][1]-48)*10) + args[0][2])-49;
-             } else {
-                 printf("Error: Please use integer numbers. e.g.!<Number>\n");
-                 HistoryErrorDecrement();
-                 return;
-             }
-
-         }
-         if(value < count-1 && value >= 0 && value <= 20) {
-             if(count > 20) {
-            value = value + Hist_numb;
-             }
+            if (args[0][2] >= 48 && args[0][2] <= 57) {
+                if (args[0][3] == 0) {
+                    value =  (Hist_numb - 1) - ((args[0][2])-48);
+                    if (value < 0) {
+                        value = value + 20;
+                    }
+                } else {
+                    value = (((args[0][2]-48)*10) + args[0][3])-48;
+                    value = (Hist_numb - 1) - value;
+                    if (value < 0) {
+                        value = value + 20;
+                    }
+                } 
+                if (value <= count-1 && value >= 0 && value < 20) { 
+                    if (Hist_numb == 0) { 
+                        if (strcmp(hist[value],"history\n") == 0) {
+                            HistoryInvokationCheckEdgeCase(value, env_vars);
+                            return;
+                        }
+                        strcpy(hist[19], hist[value]);
+                    } else {
+                        if (strcmp(hist[value],"history\n") == 0) {
+                            HistoryInvokationCheckNormalCase(value, env_vars);
+                            return;
+                        }
+                    }
+                    strcpy(hist[Hist_numb-1], hist[value]); 
+                    strcpy(TempValue[0], hist[value]); 
+                    temp = tokenise_input(TempValue[0], env_vars);
+                    execute_command(temp, env_vars);
+                    return;
+                } else {
+                    printf("You cannot select a value out of range of the history!\n");
+                    HistoryErrorDecrement();
+                    return;
+                }
+            }
+        } else {
+            printf("Please enter a Integer command! e.g. !2 , !-2, !! \n");
+            HistoryErrorDecrement();
+            return;
+        }
+    // This is for !<no>
+    } else if(args[0][1] >= 48 && args[0][1] <= 57) {
+        if(args[1] != 0) {
+            printf("Too many arguments, please follow the format (!<no>) \n");
+            HistoryErrorDecrement();
+            return;
+        }
+        if(args[0][2] == 0) {
+            value = (args[0][1])-49;
+        } else {
+            if(args[0][2] >= 48 && args[0][2] <= 57) {
+                value = (((args[0][1]-48)*10) + args[0][2])-49;
+            } else {
+                printf("Error: Please use integer numbers. e.g.!<Number>\n");
+                HistoryErrorDecrement();
+                return;
+            }
+        }
+        if(value < count-1 && value >= 0 && value <= 20) {
+            if(count > 20) {
+                value = value + Hist_numb;
+            }
             if(value > 20) {
                 value = value - 21;
             }
-             if(Hist_numb == 0) { 
-          if(strcmp(hist[value],"history\n") == 0){
-             HistoryInvokationCheckEdgeCase(value, env_vars);
+            if(Hist_numb == 0) { 
+                if(strcmp(hist[value],"history\n") == 0){
+                    HistoryInvokationCheckEdgeCase(value, env_vars);
+                    return;
+                }
+                strcpy(hist[19], hist[value]);
+            } else {
+                if(strcmp(hist[value],"history\n") == 0){
+                    HistoryInvokationCheckNormalCase(value, env_vars);
+                    return;
+                }
+                strcpy(hist[Hist_numb-1], hist[value]); 
+            }
+            strcpy(TempValue[0], hist[value]); 
+            temp = tokenise_input(TempValue[0], env_vars);
+            execute_command(temp, env_vars);
             return;
-          }
-             strcpy(hist[19], hist[value]);
-             } else {
-           if(strcmp(hist[value],"history\n") == 0){
-             HistoryInvokationCheckNormalCase(value, env_vars);
-            return;
-           }
-         strcpy(hist[Hist_numb-1], hist[value]); 
-             }
-        strcpy(TempValue[0], hist[value]); 
-        temp = tokenise_input(TempValue[0]);
-        execute_command(temp, env_vars);
-        return;
-     } else {
-         printf("You cannot select a value out of range of the history! \n");
+        } else {
+            printf("You cannot select a value out of range of the history! \n");
             HistoryErrorDecrement();
-           return;
-     }
-       } else {
-          if(args[0][1] <= 48 || args[0][1] >= 57 ) {
-        printf("Please enter a correct command! e.g. !2 , !-2, !! \n");
-         HistoryErrorDecrement();
-           return;
+            return;
+        }
+    } else {
+        if(args[0][1] <= 48 || args[0][1] >= 57 ) {
+            printf("Please enter a correct command! e.g. !2 , !-2, !! \n");
+            HistoryErrorDecrement();
+            return;
+        }
     }
-  }
 }  
 
   void HistoryErrorDecrement() {
@@ -409,7 +409,7 @@ void exec_history(char **args, Env_vars *env_vars) {
         Hist_numb--;
         count--;
         strcpy(TempValue[0], hist[value]);
-        temp = tokenise_input(TempValue[0]);
+        temp = tokenise_input(TempValue[0], env_vars);
         execute_command(temp, env_vars);
   }
 
@@ -419,7 +419,7 @@ void exec_history(char **args, Env_vars *env_vars) {
         Hist_numb = 19;
         count--;
         strcpy(TempValue[0], hist[value]);
-        temp = tokenise_input(TempValue[0]);
+        temp = tokenise_input(TempValue[0], env_vars);
         execute_command(temp, env_vars);
     }
 
