@@ -549,8 +549,10 @@ void remove_alias(char **args, Env_vars *env_vars) {
 void execute_alias(char **arg, Env_vars *env_vars){
     int alias = 0;
     for (int i = 0; i < 10; i++) {
-        if (strcmp(arg[0], env_vars->aliases[i].alias_name) == 0){
-            char **command = tokenise_input(env_vars->aliases[i].alias_command);
+        if (strcmp(arg[0], env_vars->aliases[i].alias_name) == 0) {
+            char *input = malloc(sizeof(char) * MAX_COMMAND_LENGTH);
+            strcpy(input, env_vars->aliases[i].alias_command);
+            char **command = tokenise_input(input);
             execute_command(command, env_vars);
             alias = 1;
         }  
