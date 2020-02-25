@@ -224,191 +224,192 @@ void history() {
 //Tokenise Method breaking history.
 void exec_history(char **args, Env_vars *env_vars) {
     //Holds the return from tokenise
-   char  **temp;
-   char  **temp2;
-   //Holds the value  of input from ! to compare when using array 
+    char  **temp;
+    char  **temp2;
+    //Holds the value  of input from ! to compare when using array 
     int value;
     //Creates a copy to allows to trash the array without effecting main array
     char TempValue[1][512];
-   //This is for !!
-     if(strcmp(args[0], "!!") == 0){
-         if(Hist_numb == 1 && count == 1) {
-             printf("There is no previous command to call! \n");
-             Hist_numb--;
-             count--;
-             return;
-         }
-         printf("Executing last command\n");
-         if(Hist_numb == 0 && count >= 20) { 
-           if(strcmp(hist[18],"history\n") == 0){
-             Hist_numb = 19;
-             count--;
-            strcpy(TempValue[0], hist[18]);
-             temp = tokenise_input(TempValue[0], env_vars);
-            execute_command(temp, env_vars);
+
+    //This is for !!
+    if (strcmp(args[0], "!!") == 0) {
+        if (Hist_numb == 1 && count == 1) {
+            printf("There is no previous command to call! \n");
+            Hist_numb--;
+            count--;
             return;
-         }
-         strcpy(hist[19], hist[18]); 
-         strcpy(TempValue[0], hist[19]); 
-        temp = tokenise_input(TempValue[0], env_vars);
-         } else if(Hist_numb == 1 && count >= 20) { 
-              if(strcmp(hist[19],"history\n") == 0){ 
-                  Hist_numb = 0;
-                  count--;
-                  strcpy(TempValue[0], hist[19]);
-                  temp = tokenise_input(TempValue[0], env_vars);
-                  execute_command(temp, env_vars);
-              }
+        }
+        printf("Executing last command\n");
+        if (Hist_numb == 0 && count >= 20) { 
+            if (strcmp(hist[18],"history\n") == 0) {
+                Hist_numb = 19;
+                count--;
+                strcpy(TempValue[0], hist[18]);
+                temp = tokenise_input(TempValue[0], env_vars);
+                execute_alias(temp, env_vars);
+                return;
+            }
+            strcpy(hist[19], hist[18]); 
+            strcpy(TempValue[0], hist[19]); 
+            temp = tokenise_input(TempValue[0], env_vars);
+        } else if (Hist_numb == 1 && count >= 20) { 
+            if (strcmp(hist[19],"history\n") == 0) { 
+                Hist_numb = 0;
+                count--;
+                strcpy(TempValue[0], hist[19]);
+                temp = tokenise_input(TempValue[0],env_vars);
+                execute_alias(temp, env_vars);
+            }
             strcpy(hist[0], hist[19]); 
             strcpy(TempValue[0], hist[0]); 
             temp = tokenise_input(TempValue[0], env_vars);
-         } else {
-         strcpy(hist[Hist_numb-1], hist[Hist_numb-2]); 
-         strcpy(TempValue[0], hist[Hist_numb-1]);
-         if(strcmp(TempValue[0],"history\n") == 0){
-             Hist_numb--;
-             count--;
-         }
-        temp = tokenise_input(TempValue[0], env_vars);
-         }
-
-        execute_command(temp, env_vars);
+        } else {
+            strcpy(hist[Hist_numb-1], hist[Hist_numb-2]); 
+            strcpy(TempValue[0], hist[Hist_numb-1]);
+            if (strcmp(TempValue[0],"history\n") == 0) {
+                Hist_numb--;
+                count--;
+            }
+            temp = tokenise_input(TempValue[0], env_vars);
+        }
+        execute_alias(temp, env_vars);
         return;
-           //This is for !-<no>
-         } else if(args[0][1] == 45 ) {
-         if(args[0][2] >= 48 && args[0][2] <= 57) {
-             if(args[0][3] == 0) {
+        
+    //This is for !-<no>
+    } else if (args[0][1] == 45 ) {
+        if (args[0][2] >= 48 && args[0][2] <= 57) {
+            if (args[0][3] == 0) {
                 value =  (Hist_numb - 1) - ((args[0][2])-48);
-                if(value < 0) {
+                if (value < 0) {
                     value = value + 20;
                 }
-             } else {
-                 value = (((args[0][2]-48)*10) + args[0][3])-48;
-                 value = (Hist_numb - 1) - value;
-                 if(value < 0) {
+            } else {
+                value = (((args[0][2]-48)*10) + args[0][3])-48;
+                value = (Hist_numb - 1) - value;
+                if (value < 0) {
                      value = value + 20;
-                 }
-             } 
-         if(value <= count-1 && value >= 0 && value < 20) { 
-              if(Hist_numb == 0) { 
-              if(strcmp(hist[value],"history\n") == 0){
-             Hist_numb = 19;
-             count--;
-            strcpy(TempValue[0], hist[value]);
-             temp = tokenise_input(TempValue[0], env_vars);
-            execute_command(temp, env_vars);
+                }
+            } 
+            if (value <= count-1 && value >= 0 && value < 20) { 
+                if (Hist_numb == 0) { 
+                    if (strcmp(hist[value],"history\n") == 0) {
+                        Hist_numb = 19;
+                        count--;
+                        strcpy(TempValue[0], hist[value]);
+                        temp = tokenise_input(TempValue[0], env_vars);
+                        execute_alias(temp, env_vars);
+                        return;
+                    }
+                    strcpy(hist[19], hist[value]);
+                } else {
+                    if (strcmp(hist[value],"history\n") == 0) {
+                        Hist_numb--;
+                        count--;
+                        strcpy(TempValue[0], hist[value]);
+                        temp = tokenise_input(TempValue[0], env_vars);
+                        execute_alias(temp, env_vars);
+                        return;
+                    }
+                    strcpy(hist[Hist_numb-1], hist[value]); 
+                }
+                strcpy(TempValue[0], hist[value]); 
+                temp = tokenise_input(TempValue[0], env_vars);
+                execute_alias(temp, env_vars);
+                return;
+            } else {
+                printf("You cannot select a value out of range of the history!\n");
+                if (Hist_numb == 0) {
+                    count = count - 1;
+                    Hist_numb = 19;
+                } else {
+                    count = count - 1;
+                    Hist_numb = Hist_numb - 1;
+                }
+                return;
+            }
+        } else {
+            printf("Please enter a integer command! e.g. !2 , !-2, !! \n");
+            if (Hist_numb == 0) {
+                count = count - 1;
+                Hist_numb = 19;
+            } else {
+                count = count - 1;
+                Hist_numb = Hist_numb - 1;
+            }
             return;
-          }
-             strcpy(hist[19], hist[value]);
-                 } else {
-           if(strcmp(hist[value],"history\n") == 0){
-             Hist_numb--;
-             count--;
-            strcpy(TempValue[0], hist[value]);
-             temp = tokenise_input(TempValue[0], env_vars);
-            execute_command(temp, env_vars);
-            return;
-           }
-         strcpy(hist[Hist_numb-1], hist[value]); 
-             }
-        strcpy(TempValue[0], hist[value]); 
-        temp = tokenise_input(TempValue[0], env_vars);
-        execute_command(temp, env_vars);
-        return;
-         } else {
-           printf("You cannot select a value out of range of the history!\n");
-           if(Hist_numb == 0) {
-              count = count - 1;
-              Hist_numb = 19;
-           } else {
-            count = count - 1;
-            Hist_numb = Hist_numb - 1;
-           }
-           return;
-       }
-     }  else {
-        printf("Please enter a integer command! e.g. !2 , !-2, !! \n");
-           if(Hist_numb == 0) {
-              count = count - 1;
-              Hist_numb = 19;
-           } else {
-            count = count - 1;
-            Hist_numb = Hist_numb - 1;
-           }
-           return;
-       }
-          }  else if(args[0][1] >= 48 && args[0][1] <= 57) {
-         if(args[0][2] == 0) {
-           value = (args[0][1])-49;
-         } else {
-             value = (((args[0][1]-48)*10) + args[0][2])-49;
-         }
-         if(value < count-1 && value >= 0 && value <= 20) {
-             if(count > 20) {
-            value = value + Hist_numb;
-             }
-            if(value > 20) {
+        }
+    } else if (args[0][1] >= 48 && args[0][1] <= 57) {
+        if (args[0][2] == 0) {
+            value = (args[0][1])-49;
+        } else {
+            value = (((args[0][1]-48)*10) + args[0][2])-49;
+        }
+        if (value < count-1 && value >= 0 && value <= 20) {
+            if (count > 20) {
+                value = value + Hist_numb;
+            }
+            if (value > 20) {
                 value = value - 21;
             }
-             if(Hist_numb == 0) { 
-             if(strcmp(hist[value],"history\n") == 0){
-             Hist_numb = 19;
-             count--;
-            strcpy(TempValue[0], hist[value]);
-             temp = tokenise_input(TempValue[0], env_vars);
-            execute_command(temp, env_vars);
+            if (Hist_numb == 0) { 
+                if (strcmp(hist[value],"history\n") == 0) {
+                    Hist_numb = 19;
+                    count--;
+                    strcpy(TempValue[0], hist[value]);
+                    temp = tokenise_input(TempValue[0], env_vars);
+                    execute_alias(temp, env_vars);
+                    return;
+                }
+                strcpy(hist[19], hist[value]);
+            } else {
+                if (strcmp(hist[value],"history\n") == 0) {
+                    Hist_numb--;
+                    count--;
+                    strcpy(TempValue[0], hist[value]);
+                    temp = tokenise_input(TempValue[0], env_vars);
+                    execute_alias(temp, env_vars);
+                    return;
+                }
+                strcpy(hist[Hist_numb-1], hist[value]); 
+            }
+            strcpy(TempValue[0], hist[value]); 
+            temp = tokenise_input(TempValue[0], env_vars);
+            execute_alias(temp, env_vars);
             return;
-          }
-             strcpy(hist[19], hist[value]);
-             } else {
-           if(strcmp(hist[value],"history\n") == 0){
-             Hist_numb--;
-             count--;
-            strcpy(TempValue[0], hist[value]);
-             temp = tokenise_input(TempValue[0], env_vars);
-            execute_command(temp, env_vars);
-            return;
-           }
-         strcpy(hist[Hist_numb-1], hist[value]); 
-             }
-        strcpy(TempValue[0], hist[value]); 
-        temp = tokenise_input(TempValue[0], env_vars);
-        execute_command(temp, env_vars);
-        return;
-     } else {
-         printf("You cannot select a value out of range of the history! \n");
-           if(Hist_numb == 0) {
-              count = count - 1;
-              Hist_numb = 19;
-           } else {
-            count = count - 1;
-            Hist_numb = Hist_numb - 1;
-           }
+        } else {
+            printf("You cannot select a value out of range of the history! \n");
+            if (Hist_numb == 0) {
+                count = count - 1;
+                Hist_numb = 19;
+            } else {
+                count = count - 1;
+                Hist_numb = Hist_numb - 1;
+            }
            return;
-       } 
-       } else {
-               if(args[0][1] <= 48 || args[0][1] >= 57 ) {
-        printf("Please enter a integer command! e.g. !2 , !-2, !! \n");
-           if(Hist_numb == 0) {
-              count = count - 1;
-              Hist_numb = 19;
-           } else {
-            count = count - 1;
-            Hist_numb = Hist_numb - 1;
-           }
+        } 
+    } else {
+        if (args[0][1] <= 48 || args[0][1] >= 57 ) {
+            printf("Please enter a integer command! e.g. !2 , !-2, !! \n");
+            if (Hist_numb == 0) {
+                count = count - 1;
+                Hist_numb = 19;
+            } else {
+                count = count - 1;
+                Hist_numb = Hist_numb - 1;
+            }
            return;
         }
     }
-  }  
+}  
 
-    void AddHistory(char *line)  {
-        strcpy(hist[Hist_numb], line);
-        Hist_numb = (Hist_numb + 1) % 20;
-        count ++;
-        return;
-    }
+void AddHistory(char *line)  {
+    strcpy(hist[Hist_numb], line);
+    Hist_numb = (Hist_numb + 1) % 20;
+    count ++;
+    return;
+}
 
-  void add_alias(char **arg, Env_vars *env_vars){
+void add_alias(char **arg, Env_vars *env_vars){
     int i = 3;
     int replace = 0;
     char aliasCommand[MAX_COMMAND_LENGTH] = "";
@@ -455,7 +456,7 @@ void exec_history(char **args, Env_vars *env_vars) {
     reset_colour();
 }
 
-  //Prints the ALias arrays
+//Prints the ALias arrays
 void print_aliases(Env_vars *env_vars) {
     if (env_vars->alias_no == 0){
         bred();
@@ -512,10 +513,16 @@ void remove_alias(char **args, Env_vars *env_vars) {
 /*Executes the alias command if theres an alias otherwise execute the command*/
 void execute_alias(char **arg, Env_vars *env_vars){
     int alias = 0;
+    int c = 1;
     for (int i = 0; i < 10; i++) {
         if (strcmp(arg[0], env_vars->aliases[i].alias_name) == 0) {
             char *input = malloc(sizeof(char) * MAX_COMMAND_LENGTH);
             strcpy(input, env_vars->aliases[i].alias_command);
+            while (arg[c] != NULL){
+                strcat(input, " ");
+                strcat(input, arg[c]);
+                c++;
+            }
             char **command = tokenise_input(input, env_vars);
             execute_command(command, env_vars);
             alias = 1;
