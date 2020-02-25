@@ -28,9 +28,13 @@ void init_shell(Env_vars *env_vars) {
     }
 
     if(load_history() == 0) { 
+        bred();
         printf("Error, File does not exist! \n");
+        reset_colour();
     } else {
-        printf("Success file has been loaded. \n");
+        bgreen();
+        printf("File has been successfully loaded. \n");
+        reset_colour();
     }
 
     #ifdef DEBUG
@@ -233,13 +237,17 @@ void exec_history(char **args, Env_vars *env_vars) {
     //This is for !!
     if (strcmp(args[0], "!!") == 0) {
         if (Hist_numb == 1 && count == 1) {
+            bred();
             printf("There is no previous command to call! \n");
+            reset_colour();
             Hist_numb--;
             count--;
             return;
         }
         if (args[1] != 0) {
+            bred();
             printf("Too many arguments, please follow the format (!!) \n");
+            reset_colour();
             HistoryErrorDecrement();
             return;
         }
@@ -291,7 +299,9 @@ void exec_history(char **args, Env_vars *env_vars) {
         //This is for !-<no>
         } else if (args[0][1] == 45 ) {
             if (args[1] != 0) {
+                bred();
                 printf("Too many arguments, please follow the format (!-<no>) \n");
+                reset_colour();
                 HistoryErrorDecrement();
                 return;
             }
@@ -327,20 +337,26 @@ void exec_history(char **args, Env_vars *env_vars) {
                     execute_command(temp, env_vars);
                     return;
                 } else {
+                    bred();
                     printf("You cannot select a value out of range of the history!\n");
+                    reset_colour();
                     HistoryErrorDecrement();
                     return;
                 }
             }
         } else {
+            bred();
             printf("Please enter a Integer command! e.g. !2 , !-2, !! \n");
+            reset_colour();
             HistoryErrorDecrement();
             return;
         }
     // This is for !<no>
     } else if(args[0][1] >= 48 && args[0][1] <= 57) {
         if(args[1] != 0) {
+            bred();
             printf("Too many arguments, please follow the format (!<no>) \n");
+            reset_colour();
             HistoryErrorDecrement();
             return;
         }
@@ -350,7 +366,9 @@ void exec_history(char **args, Env_vars *env_vars) {
             if(args[0][2] >= 48 && args[0][2] <= 57) {
                 value = (((args[0][1]-48)*10) + args[0][2])-49;
             } else {
+                bred();
                 printf("Error: Please use integer numbers. e.g.!<Number>\n");
+                reset_colour();
                 HistoryErrorDecrement();
                 return;
             }
@@ -380,13 +398,17 @@ void exec_history(char **args, Env_vars *env_vars) {
             execute_command(temp, env_vars);
             return;
         } else {
+            bred();
             printf("You cannot select a value out of range of the history! \n");
+            reset_colour();
             HistoryErrorDecrement();
             return;
         }
     } else {
         if(args[0][1] <= 48 || args[0][1] >= 57 ) {
+            bred();
             printf("Please enter a correct command! e.g. !2 , !-2, !! \n");
+            reset_colour();
             HistoryErrorDecrement();
             return;
         }
@@ -604,7 +626,9 @@ int save_history() {
         return 1;
         }
     } else {
+        bred();
         printf("Error, Could not find file! \n");
+        reset_colour();
         return 0; 
     }
     fclose(fp);
@@ -613,13 +637,19 @@ int save_history() {
 void exit_shell(int exit_code, Env_vars *env_vars) {
     /*Reset Path*/
     if (0 != setenv("PATH", env_vars->path, 1)) {
+        bred();
         perror("shell");
+        reset_colour();
     }
 
     if(save_history() == 0) {
+        bred();
         printf("Writing to history to file, failed! \n");
+        reset_colour();
     } else { 
-        printf("Writing to history to file is successfull. \n"); 
+        bgreen();
+        printf("Writing to history to file is successful. \n"); 
+        reset_colour();
     }
 
     exit(exit_code);
