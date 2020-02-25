@@ -1,8 +1,8 @@
 #include "header.h"
 
+char hist[20][512];
 int Hist_numb = 0;
 int count = 0;
-int NumOfAliases = 0;
 
 int main() {
     
@@ -12,14 +12,13 @@ int main() {
 
     loop_shell(&env_vars);
 
-    //exitShell();
-
     return EXIT_SUCCESS;
 }
 
 void init_shell(Env_vars *env_vars) {
     env_vars->cwd = getenv("HOME");
     env_vars->user = getenv("USER");
+    env_vars->path = getenv("PATH");
     env_vars->alias_no = 0;
 
     if (0 != chdir(env_vars->cwd)) {
@@ -28,9 +27,39 @@ void init_shell(Env_vars *env_vars) {
         reset_colour();
     }
 
+    if(load_history() == 0) { 
+        printf("Error, File does not exist! \n");
+    } else {
+        printf("Success file has been loaded. \n");
+    }
+
     #ifdef DEBUG
         printf("Home Directory: %s\n",getcwd(NULL,0));
     #endif
+}
+
+int load_history() {
+    FILE *fp;
+    char line[512];
+    Hist_numb = 0;
+    count = 0;
+
+    fp = fopen(HistoryFile, "r");
+
+    if(fp == NULL) {
+        return 0;
+    }
+      
+    while(1) { 
+        if(fgets(line, 512, fp) == NULL) {
+            break;
+        }
+        //setting last char to a new line!
+        line[strlen(line)-1] = '\n';
+        AddHistory(line);
+    }
+    fclose(fp);
+    return 1;
 }
 
 void loop_shell(Env_vars *env_vars) {
@@ -44,11 +73,11 @@ void loop_shell(Env_vars *env_vars) {
         printf("%s> ", env_vars->cwd);
         reset_colour();
         
-        input = read_input();
+        input = read_input(env_vars);
         if (input[0] == '\n') { continue; }
         else {
             add_history(input);
-            args = tokenise_input(input);
+            args = tokenise_input(input, env_vars);
             if (args[0] != NULL) execute_alias(args, env_vars);
         }
 
@@ -57,17 +86,17 @@ void loop_shell(Env_vars *env_vars) {
     } while (1);
 }
 
-char *read_input() {
+char *read_input(Env_vars *env_vars) {
     char *str = malloc(sizeof(char) * MAX_COMMAND_LENGTH);
 
     if (!str) {
         bred();
         fprintf(stderr, MEM_ALLOC_ERROR);
         reset_colour();
-        exit(EXIT_FAILURE);
+        exit_shell(EXIT_FAILURE, env_vars);
     } else if (NULL == fgets(str, MAX_COMMAND_LENGTH, stdin)) {
         printf("\n");
-        exit(EXIT_SUCCESS);
+        exit_shell(EXIT_SUCCESS, env_vars);
     } else {
         return str;
     }
@@ -79,7 +108,7 @@ void add_history(char *input) {
     count++;
 }
 
-char **tokenise_input(char *input) {
+char **tokenise_input(char *input, Env_vars *env_vars) {
     int position = 0;
     char **tokens = malloc(sizeof(char*) * MAX_TOK_NO);
     char *token;
@@ -88,12 +117,12 @@ char **tokenise_input(char *input) {
         bred();
         fprintf(stderr, MEM_ALLOC_ERROR);
         reset_colour();
-        exit(EXIT_FAILURE);
+        exit_shell(EXIT_FAILURE, env_vars);
     }
 
     token = strtok(input, TOK_DELIM);
     while (NULL != token) {
-        if (0 == strcmp("exit", token)) exit(EXIT_SUCCESS);
+        if (0 == strcmp("exit", token)) exit_shell(EXIT_SUCCESS, env_vars);
         tokens[position] = token;
         position++;
 
@@ -118,19 +147,6 @@ void execute_command(char **args, Env_vars *env_vars) {
         change_dir(args, env_vars);
     } else if (strcspn(args[0], "!") == 0) {
         exec_history(args, env_vars);
-    } else if(strcmp(args[0], "writehistory") == 0) { 
-       if(write_history_tofile() == 0) {
-           printf("Writing to history to file, failed! \n");
-       } else { 
-            printf("Writing to history to file is successfull. \n"); 
-       }
-
-       } else if(strcmp(args[0], "loadhistory") == 0) {
-           if(LoadHistory() == 0) { 
-               printf("Error, File does not exist! \n");
-           } else {
-               printf("Success file has been loaded. \n");
-           }
     } else if (strcmp(args[0], "history") == 0) { 
         history();        
     } else if (strcmp(args[0], "alias") == 0){
@@ -228,24 +244,24 @@ void exec_history(char **args, Env_vars *env_vars) {
              Hist_numb = 19;
              count--;
             strcpy(TempValue[0], hist[18]);
-             temp = tokenise_input(TempValue[0]);
+             temp = tokenise_input(TempValue[0], env_vars);
             execute_command(temp, env_vars);
             return;
          }
          strcpy(hist[19], hist[18]); 
          strcpy(TempValue[0], hist[19]); 
-        temp = tokenise_input(TempValue[0]);
+        temp = tokenise_input(TempValue[0], env_vars);
          } else if(Hist_numb == 1 && count >= 20) { 
               if(strcmp(hist[19],"history\n") == 0){ 
                   Hist_numb = 0;
                   count--;
                   strcpy(TempValue[0], hist[19]);
-                  temp = tokenise_input(TempValue[0]);
+                  temp = tokenise_input(TempValue[0], env_vars);
                   execute_command(temp, env_vars);
               }
             strcpy(hist[0], hist[19]); 
             strcpy(TempValue[0], hist[0]); 
-            temp = tokenise_input(TempValue[0]);
+            temp = tokenise_input(TempValue[0], env_vars);
          } else {
          strcpy(hist[Hist_numb-1], hist[Hist_numb-2]); 
          strcpy(TempValue[0], hist[Hist_numb-1]);
@@ -253,7 +269,7 @@ void exec_history(char **args, Env_vars *env_vars) {
              Hist_numb--;
              count--;
          }
-        temp = tokenise_input(TempValue[0]);
+        temp = tokenise_input(TempValue[0], env_vars);
          }
 
         execute_command(temp, env_vars);
@@ -279,7 +295,7 @@ void exec_history(char **args, Env_vars *env_vars) {
              Hist_numb = 19;
              count--;
             strcpy(TempValue[0], hist[value]);
-             temp = tokenise_input(TempValue[0]);
+             temp = tokenise_input(TempValue[0], env_vars);
             execute_command(temp, env_vars);
             return;
           }
@@ -289,14 +305,14 @@ void exec_history(char **args, Env_vars *env_vars) {
              Hist_numb--;
              count--;
             strcpy(TempValue[0], hist[value]);
-             temp = tokenise_input(TempValue[0]);
+             temp = tokenise_input(TempValue[0], env_vars);
             execute_command(temp, env_vars);
             return;
            }
          strcpy(hist[Hist_numb-1], hist[value]); 
              }
         strcpy(TempValue[0], hist[value]); 
-        temp = tokenise_input(TempValue[0]);
+        temp = tokenise_input(TempValue[0], env_vars);
         execute_command(temp, env_vars);
         return;
          } else {
@@ -339,7 +355,7 @@ void exec_history(char **args, Env_vars *env_vars) {
              Hist_numb = 19;
              count--;
             strcpy(TempValue[0], hist[value]);
-             temp = tokenise_input(TempValue[0]);
+             temp = tokenise_input(TempValue[0], env_vars);
             execute_command(temp, env_vars);
             return;
           }
@@ -349,14 +365,14 @@ void exec_history(char **args, Env_vars *env_vars) {
              Hist_numb--;
              count--;
             strcpy(TempValue[0], hist[value]);
-             temp = tokenise_input(TempValue[0]);
+             temp = tokenise_input(TempValue[0], env_vars);
             execute_command(temp, env_vars);
             return;
            }
          strcpy(hist[Hist_numb-1], hist[value]); 
              }
         strcpy(TempValue[0], hist[value]); 
-        temp = tokenise_input(TempValue[0]);
+        temp = tokenise_input(TempValue[0], env_vars);
         execute_command(temp, env_vars);
         return;
      } else {
@@ -385,58 +401,6 @@ void exec_history(char **args, Env_vars *env_vars) {
     }
   }  
 
-  int write_history_tofile() {
-      FILE *fp;
-
-
-      fp = fopen(HistoryFile, "w"); 
-
-      if(fp != NULL) {
-          if(count < 20) {
-               for(int i=0; i < count-1; i++) {
-               fprintf(fp, "%s",hist[i]); 
-              }
-            fclose(fp);
-            return 1;
-              } else {
-              for(int i=0; i < 19; i++) {
-              fprintf(fp, "%s",hist[Hist_numb]); 
-              Hist_numb = (Hist_numb + 1) % 20;
-              }
-              fclose(fp); 
-              return 1;
-          }
-      } else {
-          printf("Error, Could not find file! \n");
-          return 0; 
-      }
-     fclose(fp);
-  }
-
- int LoadHistory () {
-      FILE *fp;
-      char line[512];
-      Hist_numb = 0;
-      count = 0;
-
-      fp = fopen(HistoryFile, "r");
-
-      if(fp == NULL) {
-          return 0;
-      }
-      
-      while(1) { 
-         if(fgets(line, 512, fp) == NULL) {
-         break;
-      }
-      //setting last char to a new line!
-        line[strlen(line)-1] = '\n';
-        AddHistory(line);
-  }
-         fclose(fp);
-         return 1;
- }
-   
     void AddHistory(char *line)  {
         strcpy(hist[Hist_numb], line);
         Hist_numb = (Hist_numb + 1) % 20;
@@ -552,7 +516,7 @@ void execute_alias(char **arg, Env_vars *env_vars){
         if (strcmp(arg[0], env_vars->aliases[i].alias_name) == 0) {
             char *input = malloc(sizeof(char) * MAX_COMMAND_LENGTH);
             strcpy(input, env_vars->aliases[i].alias_command);
-            char **command = tokenise_input(input);
+            char **command = tokenise_input(input, env_vars);
             execute_command(command, env_vars);
             alias = 1;
         }  
@@ -574,8 +538,9 @@ int exec_external(char **args){
             bred();
             perror(args[0]);
             reset_colour();
+            exit(EXIT_FAILURE);
         }
-        exit(EXIT_FAILURE);
+        exit(EXIT_SUCCESS);
     } else if (pid < 0) {
         // Error Forking
         bred();
@@ -587,4 +552,47 @@ int exec_external(char **args){
             wpid = waitpid(pid, &status, WUNTRACED);
         } while (!WIFEXITED(status) && !WIFSIGNALED(status));
     }
+}
+
+int save_history() {
+    FILE *fp;
+
+
+    fp = fopen(HistoryFile, "w"); 
+
+    if(fp != NULL) {
+        if(count < 20) {
+            for(int i=0; i < count-1; i++) {
+                fprintf(fp, "%s",hist[i]); 
+            }
+            fclose(fp);
+            return 1;
+        } else {
+            for(int i=0; i < 19; i++) {
+                fprintf(fp, "%s",hist[Hist_numb]); 
+                Hist_numb = (Hist_numb + 1) % 20;
+            }
+        fclose(fp); 
+        return 1;
+        }
+    } else {
+        printf("Error, Could not find file! \n");
+        return 0; 
+    }
+    fclose(fp);
+}
+
+void exit_shell(int exit_code, Env_vars *env_vars) {
+    /*Reset Path*/
+    if (0 != setenv("PATH", env_vars->path, 1)) {
+        perror("shell");
+    }
+
+    if(save_history() == 0) {
+        printf("Writing to history to file, failed! \n");
+    } else { 
+        printf("Writing to history to file is successfull. \n"); 
+    }
+
+    exit(exit_code);
 }
