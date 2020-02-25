@@ -244,13 +244,15 @@ void exec_history(char **args, Env_vars *env_vars) {
             count--;
             return;
         }
+
         if (args[1] != 0) {
             bred();
             printf("Too many arguments, please follow the format (!!) \n");
-            reset_colour();
+            reset_colour(); 
             HistoryErrorDecrement();
             return;
         }
+        
         printf("Executing last command\n");
         if (Hist_numb == 0 && count >= 20) { 
             if (strcmp(hist[18],"history\n") == 0) {
@@ -261,16 +263,6 @@ void exec_history(char **args, Env_vars *env_vars) {
                 execute_alias(temp, env_vars);
                 return;
             }
-            printf("Executing last command\n");
-            if (Hist_numb == 0 && count >= 20) { 
-                if (strcmp(hist[18],"history\n") == 0) {
-                    Hist_numb = 19;
-                    count--;
-                    strcpy(TempValue[0], hist[18]);
-                    temp = tokenise_input(TempValue[0], env_vars);
-                    execute_alias(temp, env_vars);
-                    return;
-                }
                 strcpy(hist[19], hist[18]); 
                 strcpy(TempValue[0], hist[19]); 
                 temp = tokenise_input(TempValue[0], env_vars);
@@ -293,9 +285,9 @@ void exec_history(char **args, Env_vars *env_vars) {
                     count--;
                 }
                 temp = tokenise_input(TempValue[0], env_vars);
+                execute_alias(temp, env_vars);
+                return;
             }
-            execute_alias(temp, env_vars);
-            return;
         //This is for !-<no>
         } else if (args[0][1] == 45 ) {
             if (args[1] != 0) {
@@ -343,7 +335,6 @@ void exec_history(char **args, Env_vars *env_vars) {
                     HistoryErrorDecrement();
                     return;
                 }
-            }
         } else {
             bred();
             printf("Please enter a Integer command! e.g. !2 , !-2, !! \n");
