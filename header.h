@@ -9,9 +9,9 @@
 #define MAX_TOK_NO 50
 #define TOK_DELIM " \t|><&;\n"
 #define MEM_ALLOC_ERROR "Error: Memory unable to be allocated\n"
+#define HISTORY_FILE ".hist_list"
+#define ALIAS_FILE ".aliases"
 #define DEBUG
-#define HistoryFile ".hist_list"
-#define AliasFile ".aliases"
 
 typedef struct Alias {
     char alias_name[20];
@@ -27,26 +27,31 @@ typedef struct Env_vars {
 } Env_vars;
 
 void init_shell(Env_vars *env_vars);
+int load_history();
+//Elom put load_alias() on this line
+
 void loop_shell(Env_vars *env_vars);
 char *read_input();
 void add_history(char *input);
 char **tokenise_input(char *input, Env_vars *env_vars);
+void execute_alias(char **arg, Env_vars *env_vars);
+
 void execute_command(char **args, Env_vars *env_vars);
 void get_path(char **args);
 void set_path(char **args);
 void change_dir(char **args, Env_vars *env_vars);
+
 void history();
-int exec_external(char **args);
 void exec_history(char **args, Env_vars *env_vars);
-int save_history();
-int load_history();
-void AddHistory(char *line);
-void HistoryErrorDecrement();
-void HistoryInvokationCheckNormalCase(int value, Env_vars *env_vars);
-void HistoryInvokationCheckEdgeCase(int value, Env_vars *env_vars);
+void history_error_decrement();
+void history_invokation_check_normal_case(int value, Env_vars *env_vars);
+void history_invokation_check_edge_case(int value, Env_vars *env_vars);
+
 void add_alias(char **arg, Env_vars *env_vars);
 void print_aliases(Env_vars *env_vars);
-void execute_alias(char **arg, Env_vars *env_vars);
 void remove_alias(char **arg, Env_vars *env_vars);
-void exit_shell(int exit_code, Env_vars *env_vars);
+int exec_external(char **args);
+
+int save_history();
 int save_aliases(Env_vars *env_vars);
+void exit_shell(int exit_code, Env_vars *env_vars);

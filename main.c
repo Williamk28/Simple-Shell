@@ -11,8 +11,6 @@ int main() {
     init_shell(&env_vars);
 
     loop_shell(&env_vars);
-
-    return EXIT_SUCCESS;
 }
 
 void init_shell(Env_vars *env_vars) {
@@ -48,7 +46,7 @@ int load_history() {
     Hist_numb = 0;
     count = 0;
 
-    fp = fopen(HistoryFile, "r");
+    fp = fopen(HISTORY_FILE, "r");
 
     if(fp == NULL) {
         return 0;
@@ -60,7 +58,7 @@ int load_history() {
         }
         //setting last char to a new line!
         line[strlen(line)-1] = '\n';
-        AddHistory(line);
+        add_history(line);
     }
     fclose(fp);
     return 1;
@@ -142,6 +140,29 @@ char **tokenise_input(char *input, Env_vars *env_vars) {
     return tokens;
 }
 
+/*Executes the alias command if theres an alias otherwise execute the command*/
+void execute_alias(char **arg, Env_vars *env_vars){
+    int alias = 0;
+    int c = 1;
+    for (int i = 0; i < 10; i++) {
+        if (strcmp(arg[0], env_vars->aliases[i].alias_name) == 0) {
+            char *input = malloc(sizeof(char) * MAX_COMMAND_LENGTH);
+            strcpy(input, env_vars->aliases[i].alias_command);
+            while (arg[c] != NULL){
+                strcat(input, " ");
+                strcat(input, arg[c]);
+                c++;
+            }
+            char **command = tokenise_input(input, env_vars);
+            execute_command(command, env_vars);
+            alias = 1;
+        }  
+    }
+    if (alias == 0){
+        execute_command(arg, env_vars);
+    }
+}
+
 void execute_command(char **args, Env_vars *env_vars) {
     if (strcmp(args[0], "getpath") == 0) {
         get_path(args);
@@ -149,10 +170,10 @@ void execute_command(char **args, Env_vars *env_vars) {
         set_path(args);
     } else if (strcmp(args[0], "cd") == 0) {
         change_dir(args, env_vars);
-    } else if (strcspn(args[0], "!") == 0) {
-        exec_history(args, env_vars);
     } else if (strcmp(args[0], "history") == 0) { 
         history();        
+    } else if (strcspn(args[0], "!") == 0) {
+        exec_history(args, env_vars);
     } else if (strcmp(args[0], "alias") == 0){
         if (args[1] != NULL){
             add_alias(args, env_vars);
@@ -249,7 +270,7 @@ void exec_history(char **args, Env_vars *env_vars) {
             bred();
             printf("Too many arguments, please follow the format (!!) \n");
             reset_colour(); 
-            HistoryErrorDecrement();
+            history_error_decrement();
             return;
         }
         
@@ -294,7 +315,7 @@ void exec_history(char **args, Env_vars *env_vars) {
                 bred();
                 printf("Too many arguments, please follow the format (!-<no>) \n");
                 reset_colour();
-                HistoryErrorDecrement();
+                history_error_decrement();
                 return;
             }
             if (args[0][2] >= 48 && args[0][2] <= 57) {
@@ -313,13 +334,13 @@ void exec_history(char **args, Env_vars *env_vars) {
                 if (value <= count-1 && value >= 0 && value < 20) { 
                     if (Hist_numb == 0) { 
                         if (strcmp(hist[value],"history\n") == 0) {
-                            HistoryInvokationCheckEdgeCase(value, env_vars);
+                            history_invokation_check_edge_case(value, env_vars);
                             return;
                         }
                         strcpy(hist[19], hist[value]);
                     } else {
                         if (strcmp(hist[value],"history\n") == 0) {
-                            HistoryInvokationCheckNormalCase(value, env_vars);
+                            history_invokation_check_normal_case(value, env_vars);
                             return;
                         }
                     }
@@ -332,14 +353,14 @@ void exec_history(char **args, Env_vars *env_vars) {
                     bred();
                     printf("You cannot select a value out of range of the history!\n");
                     reset_colour();
-                    HistoryErrorDecrement();
+                    history_error_decrement();
                     return;
                 }
         } else {
             bred();
             printf("Please enter a Integer command! e.g. !2 , !-2, !! \n");
             reset_colour();
-            HistoryErrorDecrement();
+            history_error_decrement();
             return;
         }
     // This is for !<no>
@@ -348,7 +369,7 @@ void exec_history(char **args, Env_vars *env_vars) {
             bred();
             printf("Too many arguments, please follow the format (!<no>) \n");
             reset_colour();
-            HistoryErrorDecrement();
+            history_error_decrement();
             return;
         }
         if(args[0][2] == 0) {
@@ -360,7 +381,7 @@ void exec_history(char **args, Env_vars *env_vars) {
                 bred();
                 printf("Error: Please use integer numbers. e.g.!<Number>\n");
                 reset_colour();
-                HistoryErrorDecrement();
+                history_error_decrement();
                 return;
             }
         }
@@ -373,13 +394,13 @@ void exec_history(char **args, Env_vars *env_vars) {
             }
             if(Hist_numb == 0) { 
                 if(strcmp(hist[value],"history\n") == 0){
-                    HistoryInvokationCheckEdgeCase(value, env_vars);
+                    history_invokation_check_edge_case(value, env_vars);
                     return;
                 }
                 strcpy(hist[19], hist[value]);
             } else {
                 if(strcmp(hist[value],"history\n") == 0){
-                    HistoryInvokationCheckNormalCase(value, env_vars);
+                    history_invokation_check_normal_case(value, env_vars);
                     return;
                 }
                 strcpy(hist[Hist_numb-1], hist[value]); 
@@ -392,7 +413,7 @@ void exec_history(char **args, Env_vars *env_vars) {
             bred();
             printf("You cannot select a value out of range of the history! \n");
             reset_colour();
-            HistoryErrorDecrement();
+            history_error_decrement();
             return;
         }
     } else {
@@ -400,47 +421,42 @@ void exec_history(char **args, Env_vars *env_vars) {
             bred();
             printf("Please enter a correct command! e.g. !2 , !-2, !! \n");
             reset_colour();
-            HistoryErrorDecrement();
+            history_error_decrement();
             return;
         }
     }
 }  
 
-  void HistoryErrorDecrement() {
-   if(Hist_numb == 0) {
-     count = count - 1;
-     Hist_numb = 19;
-   } else {
-     count = count - 1;
-     Hist_numb = Hist_numb - 1;
-   }
-  }
-
-  void HistoryInvokationCheckNormalCase(int value, Env_vars *env_vars) {
-    char **temp;
-    char TempValue[1][512];
-        Hist_numb--;
-        count--;
-        strcpy(TempValue[0], hist[value]);
-        temp = tokenise_input(TempValue[0], env_vars);
-        execute_command(temp, env_vars);
-  }
-
-    void HistoryInvokationCheckEdgeCase(int value, Env_vars *env_vars) {
-    char **temp;
-    char TempValue[1][512];
+void history_error_decrement() {
+    if(Hist_numb == 0) {
+        count = count - 1;
         Hist_numb = 19;
-        count--;
-        strcpy(TempValue[0], hist[value]);
-        temp = tokenise_input(TempValue[0], env_vars);
-        execute_command(temp, env_vars);
+    } else {
+        count = count - 1;
+        Hist_numb = Hist_numb - 1;
     }
+}
 
-void AddHistory(char *line)  {
-    strcpy(hist[Hist_numb], line);
-    Hist_numb = (Hist_numb + 1) % 20;
-    count ++;
-    return;
+void history_invokation_check_normal_case(int value, Env_vars *env_vars) {
+    char **temp;
+    char TempValue[1][512];
+    
+    Hist_numb--;
+    count--;
+    strcpy(TempValue[0], hist[value]);
+    temp = tokenise_input(TempValue[0], env_vars);
+    execute_command(temp, env_vars);
+}
+
+void history_invokation_check_edge_case(int value, Env_vars *env_vars) {
+    char **temp;
+    char TempValue[1][512];
+        
+    Hist_numb = 19;
+    count--;
+    strcpy(TempValue[0], hist[value]);
+    temp = tokenise_input(TempValue[0], env_vars);
+    execute_command(temp, env_vars);
 }
 
 void add_alias(char **arg, Env_vars *env_vars){
@@ -541,31 +557,6 @@ void remove_alias(char **args, Env_vars *env_vars) {
     }
     reset_colour();
 }
-   
-
-
-/*Executes the alias command if theres an alias otherwise execute the command*/
-void execute_alias(char **arg, Env_vars *env_vars){
-    int alias = 0;
-    int c = 1;
-    for (int i = 0; i < 10; i++) {
-        if (strcmp(arg[0], env_vars->aliases[i].alias_name) == 0) {
-            char *input = malloc(sizeof(char) * MAX_COMMAND_LENGTH);
-            strcpy(input, env_vars->aliases[i].alias_command);
-            while (arg[c] != NULL){
-                strcat(input, " ");
-                strcat(input, arg[c]);
-                c++;
-            }
-            char **command = tokenise_input(input, env_vars);
-            execute_command(command, env_vars);
-            alias = 1;
-        }  
-    }
-    if (alias == 0){
-        execute_command(arg, env_vars);
-    }
-}
 
 /*Executes external commands*/
 int exec_external(char **args){ 
@@ -598,8 +589,7 @@ int exec_external(char **args){
 int save_history() {
     FILE *fp;
 
-
-    fp = fopen(HistoryFile, "w"); 
+    fp = fopen(HISTORY_FILE, "w"); 
 
     if(fp != NULL) {
         if(count < 20) {
@@ -625,6 +615,27 @@ int save_history() {
     fclose(fp);
 }
 
+int save_aliases(Env_vars *env_vars){
+    FILE *fp;
+
+    fp = fopen(ALIAS_FILE, "w");
+
+    if(fp != NULL){
+        if(count < 10){
+            for(int i = 0; i < count-1; i++){
+                fprintf(fp, "Alias Name: %s  Alias Command: %s \n", env_vars->aliases[i].alias_name, env_vars->aliases[i].alias_command);
+            }
+            fclose(fp);
+            return 1;
+        }
+    }
+    else{
+        printf("Error, could not find file!");
+        return 0;
+    }
+    fclose(fp);
+}
+
 void exit_shell(int exit_code, Env_vars *env_vars) {
     /*Reset Path*/
     if (0 != setenv("PATH", env_vars->path, 1)) {
@@ -632,6 +643,8 @@ void exit_shell(int exit_code, Env_vars *env_vars) {
         perror("shell");
         reset_colour();
     }
+
+    printf("%s\n", getenv("PATH"));
 
     if(save_history() == 0) {
         bred();
@@ -653,25 +666,4 @@ void exit_shell(int exit_code, Env_vars *env_vars) {
     }
 
     exit(exit_code);
-}
-
-int save_aliases(Env_vars *env_vars){
-    FILE *fp;
-
-    fp = fopen(AliasFile, "w");
-
-    if(fp != NULL){
-        if(count < 10){
-            for(int i = 0; i < count-1; i++){
-                fprintf(fp, "Alias Name: %s  Alias Command: %s \n", env_vars->aliases[i].alias_name, env_vars->aliases[i].alias_command);
-            }
-            fclose(fp);
-            return 1;
-        }
-    }
-    else{
-        printf("Error, could not find file!");
-        return 0;
-    }
-    fclose(fp);
 }
