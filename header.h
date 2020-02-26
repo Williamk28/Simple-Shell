@@ -11,6 +11,7 @@
 #define MEM_ALLOC_ERROR "Error: Memory unable to be allocated\n"
 #define DEBUG
 #define HistoryFile ".hist_list"
+#define AliasFile ".aliases"
 
 typedef struct Alias {
     char alias_name[20];
@@ -48,3 +49,4 @@ void print_aliases(Env_vars *env_vars);
 void execute_alias(char **arg, Env_vars *env_vars);
 void remove_alias(char **arg, Env_vars *env_vars);
 void exit_shell(int exit_code, Env_vars *env_vars);
+int save_aliases(Env_vars *env_vars);
