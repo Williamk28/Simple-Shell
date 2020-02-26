@@ -642,6 +642,36 @@ void exit_shell(int exit_code, Env_vars *env_vars) {
         printf("Writing to history to file is successful. \n"); 
         reset_colour();
     }
+    if(save_aliases(env_vars) == 0){
+        bred();
+        printf("Writing to alias to file, failed! \n");
+        reset_colour();
+    } else {
+        bgreen();
+        printf("Writing to alias to file is successful. \n");
+        reset_colour();
+    }
 
     exit(exit_code);
+}
+
+int save_aliases(Env_vars *env_vars){
+    FILE *fp;
+
+    fp = fopen(AliasFile, "w");
+
+    if(fp != NULL){
+        if(count < 10){
+            for(int i = 0; i < count-1; i++){
+                fprintf(fp, "Alias Name: %s  Alias Command: %s \n", env_vars->aliases[i].alias_name, env_vars->aliases[i].alias_command);
+            }
+            fclose(fp);
+            return 1;
+        }
+    }
+    else{
+        printf("Error, could not find file!");
+        return 0;
+    }
+    fclose(fp);
 }
