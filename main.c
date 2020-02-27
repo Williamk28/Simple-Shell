@@ -64,6 +64,30 @@ int load_history() {
     return 1;
 }
 
+int load_aliases(Env_vars *env_vars) {
+    FILE *fp;
+    char line[512];
+    env_vars->alias_no = 0;
+    count = 0;
+
+    fp = fopen(ALIAS_FILE, "r");
+
+    if(fp == NULL) {
+        return 0;
+    }
+      
+    while(1) { 
+        if(fgets(line, 512, fp) == NULL) {
+            break;
+        }
+        //setting last char to a new line!
+        line[strlen(line)-1] = '\n';
+        //add_alias(tokenise_input(env_vars->aliases[i].alias_name, " = ", env_vars->aliases[i].alias_command), env_vars);
+    }
+    fclose(fp);
+    return 1;
+}
+
 void loop_shell(Env_vars *env_vars) {
     char *input;
     char **args;
