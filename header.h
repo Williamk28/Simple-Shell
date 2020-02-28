@@ -41,7 +41,7 @@ void get_path(char **args);
 void set_path(char **args);
 void change_dir(char **args, Env_vars *env_vars);
 
-void history();
+void history(char **args);
 void exec_history(char **args, Env_vars *env_vars);
 void history_error_decrement();
 void history_invokation_check_normal_case(int value, Env_vars *env_vars);

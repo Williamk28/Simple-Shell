@@ -193,7 +193,7 @@ void execute_command(char **args, Env_vars *env_vars) {
     } else if (strcmp(args[0], "cd") == 0) {
         change_dir(args, env_vars);
     } else if (strcmp(args[0], "history") == 0) { 
-        history();        
+        history(args);        
     } else if (strcspn(args[0], "!") == 0) {
         exec_history(args, env_vars);
     } else if (strcmp(args[0], "alias") == 0){
@@ -255,8 +255,10 @@ void change_dir(char **args, Env_vars *env_vars) {
     reset_colour();
 }
 
-void history() {
-    if(count < 20) {
+void history(char **args) {
+    if(NULL != args[1]) {
+        printf("history: Too many arguments. Usage: 'history'\n");
+    } else if(count < 20) {
         for(int i=0; i <= count-1; i++) {
             printf("Command %d: %s",i+1,hist[i]);
         }
