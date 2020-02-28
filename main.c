@@ -3,7 +3,6 @@
 char hist[20][512];
 int Hist_numb = 0;
 int count = 0;
-int alias_Count = 0;
 
 int main() {
     
@@ -488,13 +487,11 @@ void add_alias(char **arg, Env_vars *env_vars){
     int i = 3;
     int replace = 0;
     char aliasCommand[MAX_COMMAND_LENGTH] = "";
-    alias_Count++;
 
     //Checks if the alias command is not empty
     if (arg[2] == NULL){
         bred();
         printf("alias: Missing arguments. Usage: 'alias', 'alias <alias name> <command>'\n");
-        alias_Count--;
     }
     else {
         //Concatenates the rest of the commnad line as one command after the 3rd argument
@@ -523,13 +520,11 @@ void add_alias(char **arg, Env_vars *env_vars){
         }
         //If alias has been replaced then do nothing
         else if (replace == 1){
-            alias_Count--;
             //Do nothing
         }
         else{
             bred();
             printf("alias: Limit of 10 aliases reached\n");
-            alias_Count--;
         }
     }
     reset_colour();
@@ -650,11 +645,13 @@ int save_aliases(Env_vars *env_vars){
     fp = fopen(ALIAS_FILE, "w");
 
     if(fp != NULL){
-            for(int i = 0; i < alias_Count; i++){
+        if(count < 10){
+            for(int i = 0; i < count-1; i++){
                 fprintf(fp, "Alias Name: %s  Alias Command: %s \n", env_vars->aliases[i].alias_name, env_vars->aliases[i].alias_command);
             }
             fclose(fp);
             return 1;
+        }
     }
     else{
         printf("Error, could not find file!");
