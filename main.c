@@ -65,7 +65,7 @@ int load_aliases(Env_vars *env_vars) {
     FILE *fp;
     char line[512];
     env_vars->alias_no = 0;
-    char **test;
+    char **args;
 
     fp = fopen(ALIAS_FILE, "r");
 
@@ -79,8 +79,8 @@ int load_aliases(Env_vars *env_vars) {
         }
         //setting last char to a new line!
         line[strlen(line)-1] = '\n';
-        test = tokenise_input(line, env_vars);
-        add_alias(test, env_vars);
+        args = tokenise_input(line, env_vars);
+        execute_command(args, env_vars);
     }
     fclose(fp);
     return 1;
@@ -536,7 +536,7 @@ void print_aliases(Env_vars *env_vars) {
     }
     else{
         for(int i = 0; i < env_vars->alias_no; i++){
-            printf("%i: %s = '%s'\n",i+1, env_vars->aliases[i].alias_name, env_vars->aliases[i].alias_command);
+            printf("alias %s = '%s'\n", env_vars->aliases[i].alias_name, env_vars->aliases[i].alias_command);
         } 
     }
     reset_colour();
@@ -644,7 +644,7 @@ int save_aliases(Env_vars *env_vars){
 
     if(fp != NULL){
             for(int i = 0; i < env_vars->alias_no; i++){
-                fprintf(fp, "%s %s\n", env_vars->aliases[i].alias_name, env_vars->aliases[i].alias_command);
+                fprintf(fp, "alias %s %s\n", env_vars->aliases[i].alias_name, env_vars->aliases[i].alias_command);
             }
             fclose(fp);
             return 1;
