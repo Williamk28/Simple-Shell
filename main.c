@@ -42,9 +42,7 @@ void init_shell(Env_vars *env_vars) {
 
 int load_history() {
     FILE *fp;
-    char line[512];
-    Hist_numb = 0;
-    count = 0;
+    char line[MAX_COMMAND_LENGTH];
 
     fp = fopen(HISTORY_FILE, "r");
 
@@ -52,10 +50,7 @@ int load_history() {
         return 0;
     }
       
-    while(1) { 
-        if(fgets(line, 512, fp) == NULL) {
-            break;
-        }
+    while(NULL != fgets(line, 512, fp)) {
         //setting last char to a new line!
         line[strlen(line)-1] = '\n';
         add_history(line);
@@ -68,7 +63,6 @@ int load_aliases(Env_vars *env_vars) {
     FILE *fp;
     char line[512];
     env_vars->alias_no = 0;
-    count = 0;
 
     fp = fopen(ALIAS_FILE, "r");
 
@@ -645,13 +639,11 @@ int save_aliases(Env_vars *env_vars){
     fp = fopen(ALIAS_FILE, "w");
 
     if(fp != NULL){
-        if(count < 10){
-            for(int i = 0; i < count-1; i++){
-                fprintf(fp, "Alias Name: %s  Alias Command: %s \n", env_vars->aliases[i].alias_name, env_vars->aliases[i].alias_command);
+            for(int i = 0; i < env_vars->alias_no; i++){
+                fprintf(fp, "%s %s \n", env_vars->aliases[i].alias_name, env_vars->aliases[i].alias_command);
             }
             fclose(fp);
             return 1;
-        }
     }
     else{
         printf("Error, could not find file!");
