@@ -35,6 +35,8 @@ void init_shell(Env_vars *env_vars) {
         reset_colour();
     }
 
+    load_aliases(env_vars);
+
     #ifdef DEBUG
         printf("Home Directory: %s\n",getcwd(NULL,0));
     #endif
@@ -63,6 +65,7 @@ int load_aliases(Env_vars *env_vars) {
     FILE *fp;
     char line[512];
     env_vars->alias_no = 0;
+    char **test;
 
     fp = fopen(ALIAS_FILE, "r");
 
@@ -76,7 +79,8 @@ int load_aliases(Env_vars *env_vars) {
         }
         //setting last char to a new line!
         line[strlen(line)-1] = '\n';
-        //add_alias(tokenise_input(env_vars->aliases[i].alias_name, " = ", env_vars->aliases[i].alias_command), env_vars);
+        test = tokenise_input(line, env_vars);
+        add_alias(test, env_vars);
     }
     fclose(fp);
     return 1;
@@ -640,7 +644,7 @@ int save_aliases(Env_vars *env_vars){
 
     if(fp != NULL){
             for(int i = 0; i < env_vars->alias_no; i++){
-                fprintf(fp, "%s %s \n", env_vars->aliases[i].alias_name, env_vars->aliases[i].alias_command);
+                fprintf(fp, "%s %s\n", env_vars->aliases[i].alias_name, env_vars->aliases[i].alias_command);
             }
             fclose(fp);
             return 1;

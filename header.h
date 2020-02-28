@@ -28,7 +28,7 @@ typedef struct Env_vars {
 
 void init_shell(Env_vars *env_vars);
 int load_history();
-//Elom put load_alias() on this line
+int load_aliases(Env_vars *env_vars);
 
 void loop_shell(Env_vars *env_vars);
 char *read_input();
