@@ -35,6 +35,8 @@ void init_shell(Env_vars *env_vars) {
         reset_colour();
     }
 
+    load_aliases(env_vars);
+
     #ifdef DEBUG
         printf("Home Directory: %s\n",getcwd(NULL,0));
     #endif
@@ -42,9 +44,7 @@ void init_shell(Env_vars *env_vars) {
 
 int load_history() {
     FILE *fp;
-    char line[512];
-    Hist_numb = 0;
-    count = 0;
+    char line[MAX_COMMAND_LENGTH];
 
     fp = fopen(HISTORY_FILE, "r");
 
@@ -52,10 +52,7 @@ int load_history() {
         return 0;
     }
       
-    while(1) { 
-        if(fgets(line, 512, fp) == NULL) {
-            break;
-        }
+    while(NULL != fgets(line, 512, fp)) {
         //setting last char to a new line!
         line[strlen(line)-1] = '\n';
         add_history(line);
@@ -68,7 +65,7 @@ int load_aliases(Env_vars *env_vars) {
     FILE *fp;
     char line[512];
     env_vars->alias_no = 0;
-    count = 0;
+    char **args;
 
     fp = fopen(ALIAS_FILE, "r");
 
@@ -82,7 +79,8 @@ int load_aliases(Env_vars *env_vars) {
         }
         //setting last char to a new line!
         line[strlen(line)-1] = '\n';
-        //add_alias(tokenise_input(env_vars->aliases[i].alias_name, " = ", env_vars->aliases[i].alias_command), env_vars);
+        args = tokenise_input(line, env_vars);
+        execute_command(args, env_vars);
     }
     fclose(fp);
     return 1;
@@ -195,7 +193,7 @@ void execute_command(char **args, Env_vars *env_vars) {
     } else if (strcmp(args[0], "cd") == 0) {
         change_dir(args, env_vars);
     } else if (strcmp(args[0], "history") == 0) { 
-        history();        
+        history(args);        
     } else if (strcspn(args[0], "!") == 0) {
         exec_history(args, env_vars);
     } else if (strcmp(args[0], "alias") == 0){
@@ -257,8 +255,10 @@ void change_dir(char **args, Env_vars *env_vars) {
     reset_colour();
 }
 
-void history() {
-    if(count < 20) {
+void history(char **args) {
+    if(NULL != args[1]) {
+        printf("history: Too many arguments. Usage: 'history'\n");
+    } else if(count < 20) {
         for(int i=0; i <= count-1; i++) {
             printf("Command %d: %s",i+1,hist[i]);
         }
@@ -538,7 +538,7 @@ void print_aliases(Env_vars *env_vars) {
     }
     else{
         for(int i = 0; i < env_vars->alias_no; i++){
-            printf("%i: %s = '%s'\n",i+1, env_vars->aliases[i].alias_name, env_vars->aliases[i].alias_command);
+            printf("alias %s = '%s'\n", env_vars->aliases[i].alias_name, env_vars->aliases[i].alias_command);
         } 
     }
     reset_colour();
@@ -645,13 +645,11 @@ int save_aliases(Env_vars *env_vars){
     fp = fopen(ALIAS_FILE, "w");
 
     if(fp != NULL){
-        if(count < 10){
-            for(int i = 0; i < count-1; i++){
-                fprintf(fp, "Alias Name: %s  Alias Command: %s \n", env_vars->aliases[i].alias_name, env_vars->aliases[i].alias_command);
+            for(int i = 0; i < env_vars->alias_no; i++){
+                fprintf(fp, "alias %s %s\n", env_vars->aliases[i].alias_name, env_vars->aliases[i].alias_command);
             }
             fclose(fp);
             return 1;
-        }
     }
     else{
         printf("Error, could not find file!");
