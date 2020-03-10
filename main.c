@@ -80,7 +80,7 @@ int load_aliases(Env_vars *env_vars) {
         //setting last char to a new line!
         line[strlen(line)-1] = '\n';
         args = tokenise_input(line, env_vars);
-        execute_command(args, env_vars);
+        add_alias(args,env_vars);
     }
     fclose(fp);
     return 1;
