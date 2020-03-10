@@ -371,7 +371,7 @@ void exec_history(char **args, Env_vars *env_vars) {
                     strcpy(hist[Hist_numb-1], hist[value]); 
                     strcpy(TempValue[0], hist[value]); 
                     temp = tokenise_input(TempValue[0], env_vars);
-                    execute_command(temp, env_vars);
+                    execute_alias(temp, env_vars);
                     return;
                 } else {
                     bred();
@@ -431,7 +431,7 @@ void exec_history(char **args, Env_vars *env_vars) {
             }
             strcpy(TempValue[0], hist[value]); 
             temp = tokenise_input(TempValue[0], env_vars);
-            execute_command(temp, env_vars);
+            execute_alias(temp, env_vars);
             return;
         } else {
             bred();
@@ -469,7 +469,7 @@ void history_invokation_check_normal_case(int value, Env_vars *env_vars) {
     count--;
     strcpy(TempValue[0], hist[value]);
     temp = tokenise_input(TempValue[0], env_vars);
-    execute_command(temp, env_vars);
+    execute_alias(temp, env_vars);
 }
 
 void history_invokation_check_edge_case(int value, Env_vars *env_vars) {
@@ -480,7 +480,7 @@ void history_invokation_check_edge_case(int value, Env_vars *env_vars) {
     count--;
     strcpy(TempValue[0], hist[value]);
     temp = tokenise_input(TempValue[0], env_vars);
-    execute_command(temp, env_vars);
+    execute_alias(temp, env_vars);
 }
 
 void add_alias(char **arg, Env_vars *env_vars){
@@ -664,6 +664,12 @@ void exit_shell(int exit_code, Env_vars *env_vars) {
         bred();
         perror("shell");
         reset_colour();
+    }
+
+    if (0 != chdir(getenv("HOME"))) {
+        perror("cd");
+    } else {
+        env_vars->cwd = getenv("HOME");
     }
 
     printf("%s\n", getenv("PATH"));
