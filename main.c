@@ -398,15 +398,15 @@ void exec_history(char **args, Env_vars *env_vars) {
         }
         if(args[0][2] == 0) {
             value = (args[0][1])-49;
-            if(Hist_numb == 1) { 
+            if(Hist_numb == 1 || Hist_numb == 2) { 
                 value = (args[0][1])-50; 
-            }
+            } 
         } else {
             if(args[0][2] >= 48 && args[0][2] <= 57) {
                 value = (((args[0][1]-48)*10) + args[0][2])-49;
-                if(Hist_numb == 1) { 
+                if(Hist_numb == 1 || Hist_numb == 2) { 
                     value = (((args[0][1]-48)*10) + args[0][2])-50;
-            }
+            } 
             } else {
                 bred();
                 printf("Error: Please use integer numbers. e.g.!<Number>\n");
