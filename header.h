@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include "print_colours_head.h"
 #define MAX_COMMAND_LENGTH 512
+#define MAX_ALIASES 10
 #define MAX_TOK_NO 50
 #define TOK_DELIM " \t|><&;\n"
 #define MEM_ALLOC_ERROR "Error: Memory unable to be allocated\n"
@@ -34,7 +35,7 @@ void loop_shell(Env_vars *env_vars);
 char *read_input();
 void add_history(char *input);
 char **tokenise_input(char *input, Env_vars *env_vars);
-void execute_alias(char **arg, Env_vars *env_vars);
+void execute_alias(char **arg, Env_vars *env_vars, int index);
 
 void execute_command(char **args, Env_vars *env_vars);
 void get_path(char **args);
