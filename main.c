@@ -8,6 +8,7 @@ int count = 0;
 char usedAliases[MAX_ALIASES][MAX_COMMAND_LENGTH];
 int noUsedAliases = 0;
 
+/* creates a struct, then calls to initiate and run the shell */
 int main()
 {
 
@@ -18,6 +19,7 @@ int main()
     loop_shell(&env_vars);
 }
 
+/* Initiates the shell with all the necessary parameters of env_vars */
 void init_shell(Env_vars *env_vars)
 {
     env_vars->cwd = getenv("HOME");
@@ -52,6 +54,7 @@ void init_shell(Env_vars *env_vars)
 #endif
 }
 
+/* Loads history into array from file */
 int load_history()
 {
     FILE *fp;
@@ -74,6 +77,7 @@ int load_history()
     return 1;
 }
 
+/* Loads aliases into array from file */
 int load_aliases(Env_vars *env_vars)
 {
     FILE *fp;
@@ -103,6 +107,7 @@ int load_aliases(Env_vars *env_vars)
     return 1;
 }
 
+/* Loops the input to keep the shell running */
 void loop_shell(Env_vars *env_vars)
 {
     char *input;
@@ -135,6 +140,7 @@ void loop_shell(Env_vars *env_vars)
     } while (1);
 }
 
+/* Reads in thye users input */
 char *read_input(Env_vars *env_vars)
 {
     char *str = malloc(sizeof(char) * MAX_COMMAND_LENGTH);
@@ -157,6 +163,7 @@ char *read_input(Env_vars *env_vars)
     }
 }
 
+/* Adds the input to the history */
 void add_history(char *input)
 {
     strcpy(hist[Hist_numb], input);
@@ -164,6 +171,7 @@ void add_history(char *input)
     count++;
 }
 
+/* Tokenises the input for parsing */
 char **tokenise_input(char *input, Env_vars *env_vars)
 {
     int position = 0;
@@ -198,7 +206,7 @@ char **tokenise_input(char *input, Env_vars *env_vars)
     return tokens;
 }
 
-/*Executes the alias command if theres an alias otherwise execute the command*/
+/* Executes the alias command if theres an alias otherwise execute the command */
 void execute_alias(char **args, Env_vars *env_vars, int index)
 {
 
@@ -228,7 +236,7 @@ void execute_alias(char **args, Env_vars *env_vars, int index)
     char **command = tokenise_input(newCmd, env_vars);
     execute_command(command, env_vars);
 }
-
+/* Calls to the necessary internal command or to the execute external function */
 void execute_command(char **args, Env_vars *env_vars)
 {
     if (strcmp(args[0], "getpath") == 0)
@@ -280,6 +288,7 @@ void execute_command(char **args, Env_vars *env_vars)
     }
 }
 
+/* Gets the current path variable */
 void get_path(char **args)
 {
     if (args[1] != NULL)
@@ -294,6 +303,7 @@ void get_path(char **args)
     }
 }
 
+/* Sets the path variable */
 void set_path(char **args)
 {
     bred();
@@ -315,6 +325,7 @@ void set_path(char **args)
     reset_colour();
 }
 
+/* Changes current working directory */
 void change_dir(char **args, Env_vars *env_vars)
 {
     bred();
@@ -347,6 +358,7 @@ void change_dir(char **args, Env_vars *env_vars)
     reset_colour();
 }
 
+/* Prints out the history */
 void history(char **args)
 {
     if (NULL != args[1])
@@ -370,6 +382,7 @@ void history(char **args)
     }
 }
 
+/* Executes history invocation commands */
 void exec_history(char **args, Env_vars *env_vars)
 {
     //Holds the return from tokenise
@@ -650,6 +663,7 @@ void history_invokation_check_edge_case(int value, Env_vars *env_vars)
     execute_command(temp, env_vars);
 }
 
+/* Adds alias to the alias list */
 void add_alias(char **arg, Env_vars *env_vars)
 {
     int i = 3;
@@ -724,6 +738,7 @@ void print_aliases(Env_vars *env_vars)
     reset_colour();
 }
 
+/* Removes an alias */
 void remove_alias(char **args, Env_vars *env_vars)
 {
     int alias = 0;
@@ -808,6 +823,7 @@ int exec_external(char **args)
     }
 }
 
+/* Saves the history array to file */
 int save_history()
 {
     FILE *fp;
@@ -846,6 +862,7 @@ int save_history()
     fclose(fp);
 }
 
+/* Saves aliases to file */
 int save_aliases(Env_vars *env_vars)
 {
     FILE *fp;
@@ -869,6 +886,7 @@ int save_aliases(Env_vars *env_vars)
     fclose(fp);
 }
 
+/* Tidys up things, calls to save history and alias and exits */
 void exit_shell(int exit_code, Env_vars *env_vars)
 {
     /*Reset Path*/
