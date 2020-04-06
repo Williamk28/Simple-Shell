@@ -1,5 +1,7 @@
 #include "header.h"
 
+/* GROUP 4 */
+/* Elom Boccorh, William Kong, Daniel Lowry, Kieran Malloy and Joe Stewart */
 char hist[20][512];
 int Hist_numb = 0;
 int count = 0;
